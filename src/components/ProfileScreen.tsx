@@ -8,6 +8,8 @@ export default function ProfileScreen() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPinSetup, setShowPinSetup] = useState(false);
   const [pin, setPin] = useState('');
+  const [editingShopName, setEditingShopName] = useState(false);
+  const [shopNameInput, setShopNameInput] = useState(state.shopProfile.shopName || '');
 
   const handleBack = () => {
     dispatch({ type: 'SET_SCREEN', payload: 'main' });
@@ -59,6 +61,42 @@ export default function ProfileScreen() {
   const handleLanguageChange = (newLang: 'en' | 'hi') => {
     dispatch({ type: 'SET_LANGUAGE', payload: newLang });
   };
+
+  const handleSaveShopName = () => {
+    dispatch({
+      type: 'UPDATE_PROFILE',
+      payload: { shopName: shopNameInput }
+    });
+    setEditingShopName(false);
+  };
+
+  const handleShareApp = () => {
+    const message = lang === 'hi'
+      ? 'मैंने DukaanDost ऐप यूज़ किया और बहुत अच्छा लगा। ये दुकानदारों के लिए बना है - बिक्री, खर्चा, उधार सब ट्रैक करो। फ्री है और हिंदी में काम करता है। तुम भी ट्राई करो: https://dukaandost.com'
+      : 'I used DukaanDost app and it\'s really good. It\'s made for shopkeepers - track sales, expenses, udhaar. It\'s free and works in Hindi. You should try it too: https://dukaandost.com';
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const handleReminderTimeChange = (time: string) => {
+    dispatch({
+      type: 'SET_REMINDER_TIME',
+      payload: time
+    });
+  };
+
+  const handleTextSizeChange = (size: 'small' | 'medium' | 'large') => {
+    localStorage.setItem('dukaandost-text-size', size);
+    const root = document.documentElement;
+    const sizes = {
+      small: '14px',
+      medium: '16px',
+      large: '18px'
+    };
+    root.style.setProperty('--base-font-size', sizes[size]);
+  };
+
+  const currentTextSize = localStorage.getItem('dukaandost-text-size') || 'medium';
 
   return (
     <div style={{
