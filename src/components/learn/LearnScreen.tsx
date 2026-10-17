@@ -19,25 +19,27 @@ export default function LearnScreen() {
   const displayDate = selectedDate || today;
   let dailySelection = state.lessonProgress.dailySelections.find(d => d.date === displayDate);
   
-  // If no selection for this date, create one
-  if (!dailySelection && displayDate === today) {
-    dailySelection = selectDailyLessons(
-      lessonLibrary,
-      state.lessonProgress,
-      state.shopProfile,
-      state.shopData
-    );
-    
-    // Save to state
-    dispatch({
-      type: 'UPDATE_LESSON_PROGRESS',
-      payload: {
-        ...state.lessonProgress,
-        dailySelections: [...state.lessonProgress.dailySelections, dailySelection],
-        lessonsShown: [...state.lessonProgress.lessonsShown, ...dailySelection.lessons.map(l => l.id)],
-      },
-    });
-  }
+  // Create daily selection if needed (in useEffect to avoid render-time dispatch)
+  useEffect(() => {
+    if (!dailySelection && displayDate === today) {
+      const newSelection = selectDailyLessons(
+        lessonLibrary,
+        state.lessonProgress,
+        state.shopProfile,
+        state.shopData
+      );
+      
+      // Save to state
+      dispatch({
+        type: 'UPDATE_LESSON_PROGRESS',
+        payload: {
+          ...state.lessonProgress,
+          dailySelections: [...state.lessonProgress.dailySelections, newSelection],
+          lessonsShown: [...state.lessonProgress.lessonsShown, ...newSelection.lessons.map(l => l.id)],
+        },
+      });
+    }
+  }, [dailySelection, displayDate, today, state.lessonProgress, state.shopProfile, state.shopData, dispatch]);
 
   const lessons = dailySelection?.lessons || [];
   const completedToday = dailySelection?.completed || [];
