@@ -282,7 +282,7 @@ export function calculateAverageDailySales(
 // Find best and worst days
 export function findBestAndWorstDays(
   data: ShopData,
-  period: 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'last-3-months' | 'this-year' | 'custom',
+  period: 'today' | 'yesterday' | 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'last-3-months' | 'this-year' | 'custom',
   startDate?: Date,
   endDate?: Date
 ): CalculationResult<{ best: { date: string; sales: number }; worst: { date: string; sales: number } }> {
@@ -405,7 +405,7 @@ export function findHighestSellingDay(data: ShopData): CalculationResult<{ date:
 // Calculate expenses by category
 export function calculateExpensesByCategory(
   data: ShopData,
-  period: 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'last-3-months' | 'this-year' | 'custom',
+  period: 'today' | 'yesterday' | 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'last-3-months' | 'this-year' | 'custom',
   startDate?: Date,
   endDate?: Date
 ): CalculationResult<{ category: string; amount: number; percentage: number }[]> {
@@ -445,7 +445,7 @@ export function calculateExpensesByCategory(
 // Calculate sales by payment type
 export function calculateSalesByPaymentType(
   data: ShopData,
-  period: 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'last-3-months' | 'this-year' | 'custom',
+  period: 'today' | 'yesterday' | 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'last-3-months' | 'this-year' | 'custom',
   startDate?: Date,
   endDate?: Date
 ): CalculationResult<{ type: string; amount: number; percentage: number }[]> {
@@ -540,8 +540,8 @@ export function calculateUdhaarStats(data: ShopData): {
 // Compare two periods
 export function comparePeriods(
   data: ShopData,
-  currentPeriod: 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'last-3-months',
-  previousPeriod: 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'last-3-months'
+  currentPeriod: 'today' | 'yesterday' | 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'last-3-months' | 'this-year',
+  previousPeriod: 'today' | 'yesterday' | 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'last-3-months' | 'this-year'
 ): CalculationResult<ComparisonResult> {
   const current = calculatePeriodStats(data, currentPeriod);
   const previous = calculatePeriodStats(data, previousPeriod);

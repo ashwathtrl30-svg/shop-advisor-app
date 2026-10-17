@@ -1,12 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../hooks/useTranslation';
-import { 
-  Message, 
-  Conversation, 
-  generateSuggestedQuestions, 
-  generateAnswer
-} from '../models/conversation';
+import { generateAnswer, generateSuggestedQuestions, AskAnswer } from '../services/askEngine';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+  feedback?: 'helpful' | 'not_helpful';
+  calculation?: {
+    period?: string;
+    entries?: number;
+    formula?: string;
+  };
+  isGeneralAdvice?: boolean;
+  hasEnoughData?: boolean;
+}
 
 export default function AskScreen() {
   const { state, dispatch } = useApp();
@@ -18,7 +28,7 @@ export default function AskScreen() {
 
   // Generate suggested questions on mount
   useEffect(() => {
-    const questions = generateSuggestedQuestions(state.shopData, state.shopProfile, lang);
+    const questions = generateSuggestedQuestions(state.shopData, state.shopProfile, lang as 'en' | 'hi');
     setSuggestedQuestions(questions);
   }, [state.shopData, state.shopProfile, lang]);
 
@@ -41,22 +51,25 @@ export default function AskScreen() {
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
 
-    // Generate answer
-    const conversation: Conversation = {
-      id: 'current',
-      messages: [...messages, userMessage],
-      createdAt: Date.now(),
-      shopProfile: state.shopProfile,
+    // Generate answer using new askEngine
+    const context = {
+      data: state.shopData,
+      profile: state.shopProfile,
+      lang: lang as 'en' | 'hi',
+      conversationHistory: messages.map(m => ({ role: m.role, content: m.content })),
     };
 
-    const answer = generateAnswer(text, conversation, state.shopData, state.shopProfile, lang);
+    const askAnswer = generateAnswer(text, context);
 
     // Add assistant message
     const assistantMessage: Message = {
       id: (Date.now() + 1).toString(),
       role: 'assistant',
-      content: answer,
+      content: askAnswer.answer,
       timestamp: Date.now(),
+      calculation: askAnswer.calculation,
+      isGeneralAdvice: askAnswer.isGeneralAdvice,
+      hasEnoughData: askAnswer.hasEnoughData,
     };
 
     setTimeout(() => {
@@ -139,45 +152,95 @@ export default function AskScreen() {
               />
               
               {msg.role === 'assistant' && (
-                <div style={{ marginTop: 'var(--space-sm)', display: 'flex', gap: 'var(--space-sm)' }}>
-                  {!msg.feedback && (
-                    <>
-                      <button
-                        onClick={() => handleFeedback(msg.id, 'helpful')}
-                        style={{
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          padding: '4px 8px',
-                          color: 'var(--color-text-secondary)',
-                        }}
-                      >
-                        👍 {lang === 'hi' ? 'मददगार' : 'Helpful'}
-                      </button>
-                      <button
-                        onClick={() => handleFeedback(msg.id, 'not_helpful')}
-                        style={{
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          padding: '4px 8px',
-                          color: 'var(--color-text-secondary)',
-                        }}
-                      >
-                        👎 {lang === 'hi' ? 'बेकार' : 'Not helpful'}
-                      </button>
-                    </>
+                <div style={{ marginTop: 'var(--space-sm)' }}>
+                  {/* General advice indicator */}
+                  {msg.isGeneralAdvice && (
+                    <div style={{
+                      fontSize: '12px',
+                      color: 'var(--color-warning)',
+                      marginBottom: 'var(--space-sm)',
+                      fontStyle: 'italic',
+                    }}>
+                      ℹ️ {lang === 'hi' ? 'सामान्य सलाह' : 'General advice'}
+                    </div>
                   )}
 
-                  {msg.feedback && (
-                    <span style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>
-                      {msg.feedback === 'helpful' 
-                        ? (lang === 'hi' ? '✅ धन्यवाद!' : '✅ Thanks!')
-                        : (lang === 'hi' ? '📝 सुधार करेंगे' : '📝 We\'ll improve')}
-                    </span>
+                  {/* Data quality warning */}
+                  {msg.hasEnoughData === false && (
+                    <div style={{
+                      fontSize: '12px',
+                      color: 'var(--color-warning)',
+                      marginBottom: 'var(--space-sm)',
+                    }}>
+                      ⚠️ {lang === 'hi' ? 'पर्याप्त डेटा नहीं' : 'Not enough data'}
+                    </div>
                   )}
+
+                  {/* Calculation details */}
+                  {msg.calculation && (
+                    <details style={{
+                      fontSize: '12px',
+                      color: 'var(--color-text-secondary)',
+                      marginBottom: 'var(--space-sm)',
+                    }}>
+                      <summary style={{ cursor: 'pointer', fontWeight: 500 }}>
+                        {lang === 'hi' ? 'गणना कैसे हुई?' : 'Show calculation'}
+                      </summary>
+                      <div style={{ marginTop: 'var(--space-xs)', paddingLeft: 'var(--space-sm)' }}>
+                        {msg.calculation.period && (
+                          <div>{lang === 'hi' ? 'अवधि:' : 'Period:'} {msg.calculation.period}</div>
+                        )}
+                        {msg.calculation.entries && (
+                          <div>{lang === 'hi' ? 'एंट्रियाँ:' : 'Entries:'} {msg.calculation.entries}</div>
+                        )}
+                        {msg.calculation.formula && (
+                          <div>{lang === 'hi' ? 'सूत्र:' : 'Formula:'} {msg.calculation.formula}</div>
+                        )}
+                      </div>
+                    </details>
+                  )}
+
+                  {/* Feedback buttons */}
+                  <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                    {!msg.feedback && (
+                      <>
+                        <button
+                          onClick={() => handleFeedback(msg.id, 'helpful')}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            padding: '4px 8px',
+                            color: 'var(--color-text-secondary)',
+                          }}
+                        >
+                          👍 {lang === 'hi' ? 'मददगार' : 'Helpful'}
+                        </button>
+                        <button
+                          onClick={() => handleFeedback(msg.id, 'not_helpful')}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            padding: '4px 8px',
+                            color: 'var(--color-text-secondary)',
+                          }}
+                        >
+                          👎 {lang === 'hi' ? 'बेकार' : 'Not helpful'}
+                        </button>
+                      </>
+                    )}
+
+                    {msg.feedback && (
+                      <span style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>
+                        {msg.feedback === 'helpful' 
+                          ? (lang === 'hi' ? '✅ धन्यवाद!' : '✅ Thanks!')
+                          : (lang === 'hi' ? '📝 सुधार करेंगे' : '📝 We\'ll improve')}
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
