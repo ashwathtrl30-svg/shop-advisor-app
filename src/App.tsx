@@ -16,6 +16,7 @@ import TopBar from './components/TopBar';
 import BottomNav from './components/BottomNav';
 import HomeScreen from './components/HomeScreen';
 import InsightsScreen from './components/InsightsScreen';
+import AskScreen from './components/AskScreen';
 import UndoBar from './components/UndoBar';
 
 function AppContent() {
@@ -99,11 +100,7 @@ function AppContent() {
       case 'insights':
         return <InsightsScreen />;
       case 'ask':
-        return <PlaceholderScreen emoji="💬" title={t('navAsk')} subtitle={
-          state.language === 'hi' 
-            ? 'अपने शब्दों में सवाल पूछें। मैं सरल जवाब दूंगा।'
-            : 'Type or speak your question. I\'ll give you a simple answer.'
-        } />;
+        return <AskScreen />;
       case 'tools':
         return <PlaceholderScreen emoji="🧰" title={t('navTools')} subtitle={
           state.language === 'hi'
