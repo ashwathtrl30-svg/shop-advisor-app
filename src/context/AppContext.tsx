@@ -2,7 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import { Language } from '../i18n/translations';
 import { ShopData, SaleEntry, ExpenseEntry, UdhaarEntry, DailyTotal, generateId, getToday } from '../models/data';
 import { AlertPreferences, InsightHistory } from '../models/insights';
-import { LessonProgress } from '../models/lessons';
+import { LessonProgress, DailyLessonSelection } from '../models/lessons';
 import { saveState, loadState, clearState, StorageError } from '../services/storage';
 import { DailyInsights } from '../services/dailyInsights';
 
@@ -99,6 +99,7 @@ type Action =
   | { type: 'UPDATE_ALERT_PREFERENCES'; payload: Partial<AlertPreferences> }
   | { type: 'COMPLETE_LESSON'; payload: string }
   | { type: 'SET_QUIZ_SCORE'; payload: { lessonId: string; score: number } }
+  | { type: 'UPDATE_LESSON_PROGRESS'; payload: LessonProgress }
   | { type: 'TOGGLE_ALERT'; payload: keyof AppState['alertsEnabled'] }
   | { type: 'SET_SCREEN'; payload: 'main' | 'alerts' | 'privacy' | 'help' | 'profile' }
   | { type: 'SET_LOADING'; payload: boolean }
@@ -137,10 +138,12 @@ const initialAlertPreferences: AlertPreferences = {
 };
 
 const initialLessonProgress: LessonProgress = {
-  completed: [],
-  quizScores: {},
-  lastLessonDate: '',
-  streak: 0,
+  totalLessons: 50, // Will be updated when library is complete
+  lessonsShown: [],
+  lessonsCompleted: [],
+  dailySelections: [],
+  currentStreak: 0,
+  longestStreak: 0,
 };
 
 const initialAlertsEnabled = {
@@ -350,34 +353,15 @@ function reducer(state: AppState, action: Action): AppState {
         alertPreferences: { ...state.alertPreferences, ...action.payload },
       };
     case 'COMPLETE_LESSON':
-      const lessonId = action.payload;
-      const alreadyCompleted = state.lessonProgress.completed.includes(lessonId);
-      const today = getToday();
-      const wasLastLessonToday = state.lessonProgress.lastLessonDate === today;
-      
-      return {
-        ...state,
-        lessonProgress: {
-          ...state.lessonProgress,
-          completed: alreadyCompleted 
-            ? state.lessonProgress.completed 
-            : [...state.lessonProgress.completed, lessonId],
-          lastLessonDate: today,
-          streak: wasLastLessonToday 
-            ? state.lessonProgress.streak 
-            : state.lessonProgress.streak + 1,
-        },
-      };
+      // This is now handled by UPDATE_LESSON_PROGRESS
+      return state;
     case 'SET_QUIZ_SCORE':
+      // Quizzes removed in Phase D
+      return state;
+    case 'UPDATE_LESSON_PROGRESS':
       return {
         ...state,
-        lessonProgress: {
-          ...state.lessonProgress,
-          quizScores: {
-            ...state.lessonProgress.quizScores,
-            [action.payload.lessonId]: action.payload.score,
-          },
-        },
+        lessonProgress: action.payload,
       };
     case 'TOGGLE_ALERT':
       return {

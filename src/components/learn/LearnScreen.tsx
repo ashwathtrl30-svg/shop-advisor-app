@@ -1,26 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useTranslation } from '../../hooks/useTranslation';
-import { lessons, getLessonOfDay, getLessonsForShop, Lesson } from '../../models/lessons';
-import LessonCard from './LessonCard';
+import { lessonLibrary, selectDailyLessons, DailyLessonSelection, Lesson } from '../../models/lessons';
+import DailyLessonCard from './DailyLessonCard';
 import CommunityBenchmarks from './CommunityBenchmarks';
 
 export default function LearnScreen() {
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
   const { lang } = useTranslation();
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
-  const lessonOfDay = getLessonOfDay(state.shopProfile, state.lessonProgress.completed);
-  const relevantLessons = getLessonsForShop(state.shopProfile.shopType);
-  const completedCount = state.lessonProgress.completed.length;
-  const totalLessons = lessons.length;
+  // Get today's date
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Get or create daily selection
+  const displayDate = selectedDate || today;
+  let dailySelection = state.lessonProgress.dailySelections.find(d => d.date === displayDate);
+  
+  // If no selection for this date, create one
+  if (!dailySelection && displayDate === today) {
+    dailySelection = selectDailyLessons(
+      lessonLibrary,
+      state.lessonProgress,
+      state.shopProfile,
+      state.shopData
+    );
+    
+    // Save to state
+    dispatch({
+      type: 'UPDATE_LESSON_PROGRESS',
+      payload: {
+        ...state.lessonProgress,
+        dailySelections: [...state.lessonProgress.dailySelections, dailySelection],
+        lessonsShown: [...state.lessonProgress.lessonsShown, ...dailySelection.lessons.map(l => l.id)],
+      },
+    });
+  }
+
+  const lessons = dailySelection?.lessons || [];
+  const completedToday = dailySelection?.completed || [];
+  const startHere = dailySelection?.startHere || [];
+  
+  // Calculate progress
+  const completedCount = state.lessonProgress.lessonsCompleted.length;
+  const totalLessons = lessonLibrary.length;
   const progressPercent = (completedCount / totalLessons) * 100;
+  
+  // Show top 3 or all
+  const displayedLessons = showAll ? lessons : lessons.slice(0, 3);
 
   if (selectedLesson) {
     return (
-      <LessonCard
+      <DailyLessonCard
         lesson={selectedLesson}
-        onBack={() => setSelectedLesson(null)}
+        isStartHere={startHere.includes(selectedLesson.id)}
+        isCompleted={completedToday.includes(selectedLesson.id)}
       />
     );
   }
@@ -34,8 +70,8 @@ export default function LearnScreen() {
         </h1>
         <p className="text-body-md" style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
           {lang === 'hi' 
-            ? '2 मिनट के छोटे पाठ। अपनी दुकान बढ़ाएं।'
-            : '2-minute lessons. Grow your shop.'}
+            ? 'रोज़ 10 नए पाठ। अपनी दुकान बढ़ाएं।'
+            : '10 new lessons daily. Grow your shop.'}
         </p>
       </div>
 
@@ -63,103 +99,129 @@ export default function LearnScreen() {
             transition: 'width 0.3s ease',
           }} />
         </div>
-        {state.lessonProgress.streak > 0 && (
+        {state.lessonProgress.currentStreak > 0 && (
           <p className="text-body-sm" style={{ margin: 'var(--space-sm) 0 0 0', color: 'var(--color-accent)' }}>
-            🔥 {state.lessonProgress.streak} {lang === 'hi' ? 'दिन लगातार!' : 'day streak!'}
+            🔥 {state.lessonProgress.currentStreak} {lang === 'hi' ? 'दिन लगातार!' : 'day streak!'}
           </p>
         )}
       </div>
 
-      {/* Lesson of the Day */}
-      {lessonOfDay && (
-        <div style={{ marginBottom: 'var(--space-lg)' }}>
-          <h2 className="text-heading-2" style={{ margin: '0 0 var(--space-md) 0' }}>
-            {lang === 'hi' ? 'आज का पाठ' : 'Lesson of the day'}
-          </h2>
-          <button
-            onClick={() => setSelectedLesson(lessonOfDay)}
-            className="card"
-            style={{
-              width: '100%',
-              padding: 'var(--space-lg)',
-              textAlign: 'left',
-              cursor: 'pointer',
-              border: '2px solid var(--color-accent)',
-              backgroundColor: 'var(--color-accent-light)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-              <span style={{ fontSize: '48px' }}>{lessonOfDay.emoji}</span>
-              <div style={{ flex: 1 }}>
-                <p className="text-heading-3" style={{ margin: '0 0 var(--space-xs) 0' }}>
-                  {lessonOfDay.title[lang]}
-                </p>
-                <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
-                  ⏱️ {lessonOfDay.durationMinutes} {lang === 'hi' ? 'मिनट' : 'min'}
-                </p>
-              </div>
-            </div>
-          </button>
+      {/* Today's Progress */}
+      {dailySelection && (
+        <div className="card" style={{ 
+          padding: 'var(--space-md)', 
+          marginBottom: 'var(--space-lg)',
+          backgroundColor: 'var(--color-accent-light)',
+        }}>
+          <p className="text-body-md" style={{ margin: 0, fontWeight: 600 }}>
+            {lang === 'hi' 
+              ? `आज ${completedToday.length} of 10 पूरे किए`
+              : `${completedToday.length} of 10 done today`}
+          </p>
         </div>
       )}
 
-      {/* All Lessons */}
-      <h2 className="text-heading-2" style={{ margin: '0 0 var(--space-md) 0' }}>
-        {lang === 'hi' ? 'सभी पाठ' : 'All lessons'}
-      </h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginBottom: 'var(--space-xl)' }}>
-        {relevantLessons.map((lesson) => {
-          const isCompleted = state.lessonProgress.completed.includes(lesson.id);
-          const isRelevant = lesson.relevantShopTypes.includes('all') || 
-                            lesson.relevantShopTypes.includes(state.shopProfile.shopType || '');
-          
-          return (
+      {/* Date selector (if viewing past days) */}
+      {selectedDate && (
+        <div style={{ marginBottom: 'var(--space-md)' }}>
+          <button
+            onClick={() => setSelectedDate(null)}
+            className="btn-ghost"
+            style={{ fontSize: '14px' }}
+          >
+            ← {lang === 'hi' ? 'आज पर वापस जाएं' : 'Back to today'}
+          </button>
+          <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', margin: 'var(--space-xs) 0 0 0' }}>
+            {lang === 'hi' ? 'दिनांक:' : 'Date:'} {new Date(selectedDate).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN')}
+          </p>
+        </div>
+      )}
+
+      {/* Today's Lessons */}
+      {lessons.length > 0 ? (
+        <>
+          <h2 className="text-heading-2" style={{ margin: '0 0 var(--space-md) 0' }}>
+            {selectedDate ? (lang === 'hi' ? 'उस दिन के पाठ' : 'Lessons from that day') : (lang === 'hi' ? 'आज के पाठ' : "Today's lessons")}
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginBottom: 'var(--space-xl)' }}>
+            {displayedLessons.map((lesson) => (
+              <DailyLessonCard
+                key={lesson.id}
+                lesson={lesson}
+                isStartHere={startHere.includes(lesson.id)}
+                isCompleted={completedToday.includes(lesson.id)}
+              />
+            ))}
+          </div>
+
+          {/* See all button */}
+          {!showAll && lessons.length > 3 && (
             <button
-              key={lesson.id}
-              onClick={() => setSelectedLesson(lesson)}
-              className="card"
-              style={{
-                width: '100%',
-                padding: 'var(--space-md)',
-                textAlign: 'left',
-                cursor: 'pointer',
-                opacity: isRelevant ? 1 : 0.7,
-                position: 'relative',
-              }}
+              onClick={() => setShowAll(true)}
+              className="btn-secondary"
+              style={{ marginBottom: 'var(--space-md)' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-                <span style={{ fontSize: '36px' }}>{lesson.emoji}</span>
-                <div style={{ flex: 1 }}>
-                  <p className="text-body-lg" style={{ margin: '0 0 var(--space-xs) 0', fontWeight: 600 }}>
-                    {lesson.title[lang]}
-                  </p>
-                  <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
-                    ⏱️ {lesson.durationMinutes} {lang === 'hi' ? 'मिनट' : 'min'}
-                  </p>
-                </div>
-                {isCompleted && (
-                  <span style={{ fontSize: '24px' }}>✅</span>
-                )}
-              </div>
-              {isRelevant && !isCompleted && (
-                <span style={{
-                  position: 'absolute',
-                  top: '8px',
-                  right: '8px',
-                  backgroundColor: 'var(--color-accent)',
-                  color: 'white',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  padding: '2px 8px',
-                  borderRadius: 'var(--radius-full)',
-                }}>
-                  {lang === 'hi' ? 'आपके लिए' : 'For you'}
-                </span>
-              )}
+              {lang === 'hi' ? `सभी 10 पाठ देखें` : `See all 10 lessons`}
             </button>
-          );
-        })}
-      </div>
+          )}
+
+          {/* Show less button */}
+          {showAll && lessons.length > 3 && (
+            <button
+              onClick={() => setShowAll(false)}
+              className="btn-ghost"
+              style={{ marginBottom: 'var(--space-md)', width: '100%', justifyContent: 'center' }}
+            >
+              {lang === 'hi' ? 'कम दिखाएं' : 'Show less'}
+            </button>
+          )}
+        </>
+      ) : (
+        <div className="card" style={{
+          padding: 'var(--space-2xl)',
+          textAlign: 'center',
+        }}>
+          <div style={{ fontSize: '64px', marginBottom: 'var(--space-lg)' }}>📚</div>
+          <h3 className="text-heading-2" style={{ margin: '0 0 var(--space-md) 0' }}>
+            {lang === 'hi' ? 'कोई पाठ उपलब्ध नहीं' : 'No lessons available'}
+          </h3>
+          <p className="text-body-md" style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
+            {lang === 'hi'
+              ? 'कल फिर देखें।'
+              : 'Check back tomorrow.'}
+          </p>
+        </div>
+      )}
+
+      {/* Past days selector */}
+      {!selectedDate && state.lessonProgress.dailySelections.length > 1 && (
+        <div style={{ marginTop: 'var(--space-xl)' }}>
+          <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', margin: '0 0 var(--space-sm) 0' }}>
+            {lang === 'hi' ? 'पिछले दिन:' : 'Past days:'}
+          </p>
+          <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+            {state.lessonProgress.dailySelections
+              .filter(d => d.date !== today)
+              .slice(-5)
+              .reverse()
+              .map(day => (
+                <button
+                  key={day.date}
+                  onClick={() => setSelectedDate(day.date)}
+                  className="btn-ghost"
+                  style={{ 
+                    padding: 'var(--space-xs) var(--space-sm)',
+                    fontSize: '12px',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-sm)',
+                  }}
+                >
+                  {new Date(day.date).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short' })}
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* Community Benchmarks */}
       <CommunityBenchmarks />
