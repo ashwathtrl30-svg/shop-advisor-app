@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../hooks/useTranslation';
+import { exportData, importData, clearState } from '../services/storage';
 
 export default function ProfileScreen() {
   const { state, dispatch } = useApp();
@@ -16,15 +17,8 @@ export default function ProfileScreen() {
   };
 
   const handleExportData = () => {
-    const data = {
-      shopProfile: state.shopProfile,
-      shopData: state.shopData,
-      insightHistory: state.insightHistory,
-      lessonProgress: state.lessonProgress,
-      exportDate: new Date().toISOString(),
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const json = exportData(state);
+    const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -33,11 +27,39 @@ export default function ProfileScreen() {
     URL.revokeObjectURL(url);
   };
 
+  const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const json = e.target?.result as string;
+      const { state: importedState, error } = importData(json);
+      
+      if (error) {
+        alert(error);
+        return;
+      }
+
+      if (importedState) {
+        dispatch({ type: 'LOAD_STATE', payload: importedState });
+        alert(lang === 'hi' ? 'डेटा सफलतापूर्वक इम्पोर्ट हो गया' : 'Data imported successfully');
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset file input
+    event.target.value = '';
+  };
+
   const handleDeleteData = () => {
     if (showDeleteConfirm) {
-      // Reset to initial state
-      localStorage.removeItem('dukaandost-state');
-      window.location.reload();
+      const error = clearState();
+      if (error) {
+        alert(error.message);
+        return;
+      }
+      dispatch({ type: 'CLEAR_ALL_DATA' });
     } else {
       setShowDeleteConfirm(true);
     }
@@ -264,6 +286,27 @@ export default function ProfileScreen() {
           >
             📥 {lang === 'hi' ? 'डेटा एक्सपोर्ट करें' : 'Export Data'}
           </button>
+
+          <label
+            className="btn-secondary"
+            style={{ 
+              width: '100%', 
+              marginBottom: 'var(--space-sm)', 
+              padding: 'var(--space-sm)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            📤 {lang === 'hi' ? 'डेटा इम्पोर्ट करें' : 'Import Data'}
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImportData}
+              style={{ display: 'none' }}
+            />
+          </label>
 
           <button
             onClick={handleDeleteData}

@@ -62,6 +62,28 @@ function AppContent() {
     document.documentElement.classList.toggle('light', !state.darkMode);
   }, [state.darkMode]);
 
+  // Show loading screen while data is being loaded
+  if (state.isLoading) {
+    return (
+      <div style={{
+        height: '100vh',
+        maxWidth: '480px',
+        margin: '0 auto',
+        backgroundColor: 'var(--color-bg)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 'var(--space-6)',
+      }}>
+        <div style={{ fontSize: '64px' }}>🏪</div>
+        <p className="text-body-lg" style={{ color: 'var(--color-text-secondary)' }}>
+          {state.language === 'hi' ? 'लोड हो रहा है...' : 'Loading...'}
+        </p>
+      </div>
+    );
+  }
+
   // Render onboarding screens
   const renderOnboarding = () => {
     switch (state.onboardingStep) {
@@ -143,6 +165,19 @@ function AppContent() {
     }}>
       {/* Top Bar - Fixed at top */}
       <TopBar isOffline={isOffline} onProfileClick={() => dispatch({ type: 'SET_SCREEN', payload: 'profile' })} />
+
+      {/* Storage Error Banner */}
+      {state.storageError && (
+        <div style={{
+          backgroundColor: 'var(--color-warning)',
+          color: 'white',
+          padding: 'var(--space-3) var(--space-4)',
+          textAlign: 'center',
+          fontSize: 'var(--text-sm)',
+        }}>
+          ⚠️ {state.storageError.message}
+        </div>
+      )}
 
       {/* Main Content - Scrollable area */}
       <main style={{

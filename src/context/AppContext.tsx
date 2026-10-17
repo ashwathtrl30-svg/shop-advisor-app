@@ -3,6 +3,7 @@ import { Language } from '../i18n/translations';
 import { ShopData, SaleEntry, ExpenseEntry, UdhaarEntry, DailyTotal, generateId, getToday } from '../models/data';
 import { AlertPreferences, InsightHistory } from '../models/insights';
 import { LessonProgress } from '../models/lessons';
+import { saveState, loadState, clearState, StorageError } from '../services/storage';
 
 // Shop profile data
 export interface ShopProfile {
@@ -52,6 +53,8 @@ export interface AppState {
     dailyReminder: boolean;
   };
   showScreen: 'main' | 'alerts' | 'privacy' | 'help' | 'profile';
+  isLoading: boolean;
+  storageError: StorageError | null;
 }
 
 // Actions
@@ -84,7 +87,10 @@ type Action =
   | { type: 'SET_QUIZ_SCORE'; payload: { lessonId: string; score: number } }
   | { type: 'TOGGLE_ALERT'; payload: keyof AppState['alertsEnabled'] }
   | { type: 'SET_SCREEN'; payload: 'main' | 'alerts' | 'privacy' | 'help' | 'profile' }
-  | { type: 'LOAD_STATE'; payload: Partial<AppState> };
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_STORAGE_ERROR'; payload: StorageError | null }
+  | { type: 'LOAD_STATE'; payload: Partial<AppState> }
+  | { type: 'CLEAR_ALL_DATA' };
 
 const initialShopData: ShopData = {
   sales: [],
@@ -145,6 +151,8 @@ const initialState: AppState = {
   lessonProgress: initialLessonProgress,
   alertsEnabled: initialAlertsEnabled,
   showScreen: 'main',
+  isLoading: true,
+  storageError: null,
 };
 
 function reducer(state: AppState, action: Action): AppState {
@@ -364,8 +372,22 @@ function reducer(state: AppState, action: Action): AppState {
       };
     case 'SET_SCREEN':
       return { ...state, showScreen: action.payload };
+    case 'SET_LOADING':
+      return { ...state, isLoading: action.payload };
+    case 'SET_STORAGE_ERROR':
+      return { ...state, storageError: action.payload };
+    case 'CLEAR_ALL_DATA':
+      return {
+        ...initialState,
+        isLoading: false,
+        storageError: null,
+      };
     case 'LOAD_STATE':
-      return { ...state, ...action.payload };
+      return { 
+        ...state, 
+        ...action.payload,
+        isLoading: false,
+      };
     default:
       return state;
   }
@@ -383,35 +405,31 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Load state from localStorage on mount
+  // Load state from storage on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('dukaandost-state');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        dispatch({ type: 'LOAD_STATE', payload: parsed });
-      }
-    } catch (e) {
-      console.error('Failed to load state:', e);
+    const { state: savedState, error } = loadState();
+    
+    if (error) {
+      dispatch({ type: 'SET_STORAGE_ERROR', payload: error });
+    }
+    
+    if (savedState) {
+      dispatch({ type: 'LOAD_STATE', payload: savedState });
+    } else {
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   }, []);
 
-  // Save state to localStorage on change
+  // Save state to storage on every change (except loading state changes)
   useEffect(() => {
-    try {
-      const toSave = {
-        language: state.language,
-        onboardingStep: state.onboardingStep,
-        currentQuestion: state.currentQuestion,
-        phoneNumber: state.phoneNumber,
-        shopProfile: state.shopProfile,
-        tourStep: state.tourStep,
-        darkMode: state.darkMode,
-        shopData: state.shopData,
-      };
-      localStorage.setItem('dukaandost-state', JSON.stringify(toSave));
-    } catch (e) {
-      console.error('Failed to save state:', e);
+    if (state.isLoading) return; // Don't save during initial load
+    
+    const error = saveState(state);
+    if (error) {
+      dispatch({ type: 'SET_STORAGE_ERROR', payload: error });
+    } else if (state.storageError) {
+      // Clear error if save succeeded
+      dispatch({ type: 'SET_STORAGE_ERROR', payload: null });
     }
   }, [state]);
 
