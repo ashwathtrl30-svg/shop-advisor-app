@@ -136,6 +136,7 @@ export const translations = {
     
     // Bottom Nav
     navHome: 'Home',
+    navInsights: 'Insights',
     navAsk: 'Ask',
     navTools: 'Tools',
     navLearn: 'Learn',
@@ -335,6 +336,7 @@ export const translations = {
     
     // Bottom Nav
     navHome: 'होम',
+    navInsights: 'सलाह',
     navAsk: 'पूछें',
     navTools: 'टूल्स',
     navLearn: 'सीखें',

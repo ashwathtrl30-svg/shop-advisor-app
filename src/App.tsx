@@ -15,6 +15,7 @@ import TourScreen from './components/onboarding/TourScreen';
 import TopBar from './components/TopBar';
 import BottomNav from './components/BottomNav';
 import HomeScreen from './components/HomeScreen';
+import InsightsScreen from './components/InsightsScreen';
 import UndoBar from './components/UndoBar';
 
 function AppContent() {
@@ -95,6 +96,8 @@ function AppContent() {
     switch (state.activeTab) {
       case 'home':
         return <HomeScreen />;
+      case 'insights':
+        return <InsightsScreen />;
       case 'ask':
         return <PlaceholderScreen emoji="💬" title={t('navAsk')} subtitle={
           state.language === 'hi' 

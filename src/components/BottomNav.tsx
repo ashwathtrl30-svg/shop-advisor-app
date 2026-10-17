@@ -11,6 +11,7 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
 
   const tabs = [
     { id: 'home', label: t('navHome'), icon: HomeIcon },
+    { id: 'insights', label: t('navInsights'), icon: InsightsIcon },
     { id: 'ask', label: t('navAsk'), icon: AskIcon },
     { id: 'tools', label: t('navTools'), icon: ToolsIcon },
     { id: 'learn', label: t('navLearn'), icon: LearnIcon },
@@ -78,6 +79,19 @@ function LearnIcon({ active }: { active: boolean }) {
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
       </>}
       {active && <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2V3zm20 0h-6a4 4 0 00-4 4v14a3 3 0 013-3h7V3z" />}
+    </svg>
+  );
+}
+
+function InsightsIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={active ? 0 : 2} strokeLinecap="round" strokeLinejoin="round">
+      {!active && <>
+        <path d="M9 18h6" />
+        <path d="M10 22h4" />
+        <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z" />
+      </>}
+      {active && <path d="M9 18h6M10 22h4M12 2a7 7 0 00-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 001 1h6a1 1 0 001-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 00-7-7z" />}
     </svg>
   );
 }

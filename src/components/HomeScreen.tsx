@@ -1,22 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../hooks/useTranslation';
 import { getTodaySummary, formatCurrency, getPendingUdhaar, getOverdueUdhaar } from '../models/data';
+import { generateInsights, Insight } from '../models/insights';
 import WeeklyChart from './WeeklyChart';
+import InsightCard from './InsightCard';
 import SaleEntryScreen from './data/SaleEntryScreen';
 import ExpenseEntryScreen from './data/ExpenseEntryScreen';
 import UdhaarEntryScreen from './data/UdhaarEntryScreen';
 
 export default function HomeScreen() {
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
   const { t, lang } = useTranslation();
   const [showEntry, setShowEntry] = useState<'sale' | 'expense' | 'udhaar' | null>(null);
+  const [topInsight, setTopInsight] = useState<Insight | null>(null);
   
   const profile = state.shopProfile;
   const shopData = state.shopData;
   const todaySummary = getTodaySummary(shopData);
   const pendingUdhaar = getPendingUdhaar(shopData);
   const overdueUdhaar = getOverdueUdhaar(shopData);
+
+  // Generate top insight
+  useEffect(() => {
+    const insights = generateInsights(
+      shopData,
+      profile,
+      state.insightHistory,
+      state.alertPreferences
+    );
+
+    if (insights.length > 0) {
+      setTopInsight(insights[0]);
+      dispatch({ type: 'ADD_INSIGHT', payload: insights[0].id });
+    }
+  }, [shopData, profile, state.insightHistory, state.alertPreferences]);
 
   // Get today's date
   const today = new Date();
@@ -30,76 +48,7 @@ export default function HomeScreen() {
   const shopName = profile.shopName || (lang === 'hi' ? 'दोस्त' : 'Friend');
   const greeting = lang === 'hi' ? `नमस्ते ${shopName} जी` : `Namaste ${shopName} ji`;
 
-  // Personalized advice based on shop type and data
-  const getAdvice = () => {
-    const shopType = profile.shopType;
-    
-    // If there's overdue udhaar, prioritize that
-    if (overdueUdhaar.length > 0) {
-      return {
-        emoji: '⏰',
-        title: lang === 'hi' ? 'उधार याद दिलाएं' : 'Remind about udhaar',
-        text: lang === 'hi'
-          ? `${overdueUdhaar.length} ग्राहकों का उधार समय बीत गया। आज याद दिलाएं।`
-          : `${overdueUdhaar.length} customers' udhaar is overdue. Remind them today.`,
-        action: () => setShowEntry('udhaar'),
-      };
-    }
 
-    // Shop-type specific advice
-    if (shopType === 'bakery') {
-      return {
-        emoji: '💡',
-        title: lang === 'hi' ? 'स्मार्ट टिप' : 'Smart Tip',
-        text: lang === 'hi'
-          ? 'आटे की कीमत बढ़ रही है। इस हफ्ते ज़्यादा स्टॉक मत रखिए।'
-          : 'Flour prices are rising. Don\'t keep too much stock this week.',
-        action: () => {},
-      };
-    }
-    if (shopType === 'medical') {
-      return {
-        emoji: '💡',
-        title: lang === 'hi' ? 'स्मार्ट टिप' : 'Smart Tip',
-        text: lang === 'hi'
-          ? '3 दवाइयाँ अगले महीने एक्सपायर हो रही हैं। जल्दी बेच दीजिए।'
-          : '3 medicines expire next month. Try to sell them quickly.',
-        action: () => {},
-      };
-    }
-    if (shopType === 'kirana') {
-      return {
-        emoji: '💡',
-        title: lang === 'hi' ? 'स्मार्ट टिप' : 'Smart Tip',
-        text: lang === 'hi'
-          ? 'मैगी का स्टॉक कम हो रहा है। रोज़ 20 पैकेट बिकते हैं। 100 और मंगा लीजिए।'
-          : 'Your Maggi stock is running low. You sell about 20 packets daily. Order 100 more today.',
-        action: () => {},
-      };
-    }
-    if (shopType === 'vegetable') {
-      return {
-        emoji: '💡',
-        title: lang === 'hi' ? 'स्मार्ट टिप' : 'Smart Tip',
-        text: lang === 'hi'
-          ? 'कल टमाटर 2 किलो खराब हो गए। आज कम मंगाइए।'
-          : '2 kg of tomatoes went bad yesterday. Order less today.',
-        action: () => {},
-      };
-    }
-
-    // Default advice
-    return {
-      emoji: '💡',
-      title: lang === 'hi' ? 'आज की सलाह' : 'Today\'s Advice',
-      text: lang === 'hi'
-        ? 'आज की बिक्री और खर्चे डालें। मैं बताऊंगा आपकी दुकान कैसी चल रही है।'
-        : 'Add today\'s sales and expenses. I\'ll show you how your shop is doing.',
-      action: () => setShowEntry('sale'),
-    };
-  };
-
-  const advice = getAdvice();
 
   // Show entry screen
   if (showEntry) {
@@ -185,39 +134,8 @@ export default function HomeScreen() {
         </div>
       )}
 
-      {/* Advice Card */}
-      <div className="card" style={{
-        borderLeft: '4px solid var(--color-accent)',
-        backgroundColor: 'var(--color-accent-light)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-md)' }}>
-          <span style={{ fontSize: '28px' }}>{advice.emoji}</span>
-          <div style={{ flex: 1 }}>
-            <p className="text-heading-3" style={{ margin: '0 0 var(--space-xs) 0' }}>
-              {advice.title}
-            </p>
-            <p className="text-body-md" style={{ margin: '0 0 var(--space-md) 0', color: 'var(--color-text-secondary)' }}>
-              {advice.text}
-            </p>
-            <button
-              onClick={advice.action}
-              style={{
-                backgroundColor: 'var(--color-accent)',
-                color: 'white',
-                border: 'none',
-                borderRadius: 'var(--radius-md)',
-                padding: 'var(--space-sm) var(--space-md)',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontFamily: 'var(--font-family)',
-              }}
-            >
-              {lang === 'hi' ? 'और जानें' : 'Learn more'}
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Top Insight */}
+      {topInsight && <InsightCard insight={topInsight} />}
 
       {/* Quick Add Row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-md)' }}>

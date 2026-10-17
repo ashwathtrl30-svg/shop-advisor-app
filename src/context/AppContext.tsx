@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { Language } from '../i18n/translations';
 import { ShopData, SaleEntry, ExpenseEntry, UdhaarEntry, DailyTotal, generateId, getToday } from '../models/data';
+import { AlertPreferences, InsightHistory } from '../models/insights';
 
 // Shop profile data
 export interface ShopProfile {
@@ -40,6 +41,8 @@ export interface AppState {
   activeTab: string;
   shopData: ShopData;
   lastAction: { type: string; id: string; timestamp: number } | null;
+  insightHistory: InsightHistory;
+  alertPreferences: AlertPreferences;
 }
 
 // Actions
@@ -64,6 +67,10 @@ type Action =
   | { type: 'TOGGLE_STOCK_TRACKING' }
   | { type: 'UPDATE_STREAK'; payload: number }
   | { type: 'SET_LAST_ACTION'; payload: { type: string; id: string; timestamp: number } | null }
+  | { type: 'ADD_INSIGHT'; payload: string }
+  | { type: 'SET_INSIGHT_FEEDBACK'; payload: { id: string; feedback: 'yes' | 'no' } }
+  | { type: 'UPDATE_INSIGHT_HISTORY'; payload: Partial<InsightHistory> }
+  | { type: 'UPDATE_ALERT_PREFERENCES'; payload: Partial<AlertPreferences> }
   | { type: 'LOAD_STATE'; payload: Partial<AppState> };
 
 const initialShopData: ShopData = {
@@ -73,6 +80,25 @@ const initialShopData: ShopData = {
   dailyTotals: [],
   streak: 0,
   enableStockTracking: false,
+};
+
+const initialInsightHistory: InsightHistory = {
+  shown: [],
+  feedback: {},
+  lastGenerated: 0,
+  dailyCount: 0,
+  lastDate: '',
+};
+
+const initialAlertPreferences: AlertPreferences = {
+  profit: true,
+  costs: true,
+  udhaar: true,
+  stock: true,
+  season: true,
+  pricing: true,
+  cashSafety: true,
+  wins: true,
 };
 
 const initialState: AppState = {
@@ -87,6 +113,8 @@ const initialState: AppState = {
   activeTab: 'home',
   shopData: initialShopData,
   lastAction: null,
+  insightHistory: initialInsightHistory,
+  alertPreferences: initialAlertPreferences,
 };
 
 function reducer(state: AppState, action: Action): AppState {
@@ -234,6 +262,38 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, shopData: { ...state.shopData, streak: action.payload } };
     case 'SET_LAST_ACTION':
       return { ...state, lastAction: action.payload };
+    case 'ADD_INSIGHT':
+      return {
+        ...state,
+        insightHistory: {
+          ...state.insightHistory,
+          shown: [...state.insightHistory.shown, action.payload],
+          dailyCount: state.insightHistory.dailyCount + 1,
+          lastGenerated: Date.now(),
+          lastDate: getToday(),
+        },
+      };
+    case 'SET_INSIGHT_FEEDBACK':
+      return {
+        ...state,
+        insightHistory: {
+          ...state.insightHistory,
+          feedback: {
+            ...state.insightHistory.feedback,
+            [action.payload.id]: action.payload.feedback,
+          },
+        },
+      };
+    case 'UPDATE_INSIGHT_HISTORY':
+      return {
+        ...state,
+        insightHistory: { ...state.insightHistory, ...action.payload },
+      };
+    case 'UPDATE_ALERT_PREFERENCES':
+      return {
+        ...state,
+        alertPreferences: { ...state.alertPreferences, ...action.payload },
+      };
     case 'LOAD_STATE':
       return { ...state, ...action.payload };
     default:
