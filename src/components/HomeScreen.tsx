@@ -63,11 +63,11 @@ export default function HomeScreen() {
   const hasData = todaySummary.sales > 0 || todaySummary.expenses > 0;
 
   return (
-    <div style={{ padding: '0 var(--space-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+    <div className="screen-container" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       
       {/* Greeting */}
       <div>
-        <h2 className="text-heading-1" style={{ margin: '0 0 var(--space-xs) 0' }}>
+        <h2 className="text-heading-1" style={{ margin: '0 0 var(--space-2) 0' }}>
           {greeting}
         </h2>
         <p className="text-body-md" style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
@@ -78,15 +78,15 @@ export default function HomeScreen() {
       {/* Today Card */}
       {!hasData ? (
         <div className="card" style={{
-          padding: 'var(--space-xl)',
+          padding: 'var(--space-6)',
           textAlign: 'center',
           backgroundColor: 'var(--color-primary-light)',
         }}>
-          <div style={{ fontSize: '48px', marginBottom: 'var(--space-md)' }}>📝</div>
-          <p className="text-heading-2" style={{ margin: '0 0 var(--space-md) 0' }}>
+          <div style={{ fontSize: '48px', marginBottom: 'var(--space-4)' }}>📝</div>
+          <p className="text-heading-2" style={{ margin: '0 0 var(--space-3) 0' }}>
             {lang === 'hi' ? 'आज की बिक्री डालें' : 'Add today\'s sales'}
           </p>
-          <p className="text-body-md" style={{ color: 'var(--color-text-secondary)', margin: '0 0 var(--space-lg) 0' }}>
+          <p className="text-body-md" style={{ color: 'var(--color-text-secondary)', margin: '0 0 var(--space-6) 0' }}>
             {lang === 'hi'
               ? '10 सेकंड में डालें। मैं बताऊंगा आपकी दुकान कैसी चल रही है।'
               : 'Takes 10 seconds. I\'ll show you how your shop is doing.'}
@@ -94,7 +94,6 @@ export default function HomeScreen() {
           <button
             onClick={() => setShowEntry('sale')}
             className="btn-primary"
-            style={{ fontSize: '18px' }}
           >
             <span>✏️</span>
             {lang === 'hi' ? 'बिक्री डालें' : 'Add Sale'}
@@ -102,28 +101,26 @@ export default function HomeScreen() {
         </div>
       ) : (
         <div className="card">
-          <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', margin: '0 0 var(--space-sm) 0' }}>
+          <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', margin: '0 0 var(--space-2) 0' }}>
             {lang === 'hi' ? 'आज की बिक्री' : 'Today\'s Sales'}
           </p>
-          <p className="text-number" style={{ color: 'var(--color-primary)', margin: '0 0 var(--space-md) 0' }}>
+          <p className="text-number" style={{ color: 'var(--color-primary)', margin: '0 0 var(--space-4) 0' }}>
             {formatCurrency(todaySummary.sales)}
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
             <div>
-              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 4px 0' }}>
+              <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', margin: '0 0 var(--space-1) 0' }}>
                 {lang === 'hi' ? 'खर्चे' : 'Expenses'}
               </p>
-              <p style={{ fontSize: '20px', fontWeight: 700, margin: 0 }}>
+              <p className="text-heading-3" style={{ margin: 0 }}>
                 {formatCurrency(todaySummary.expenses)}
               </p>
             </div>
             <div>
-              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 4px 0' }}>
+              <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', margin: '0 0 var(--space-1) 0' }}>
                 {lang === 'hi' ? 'मुनाफ़ा' : 'Profit'}
               </p>
-              <p style={{
-                fontSize: '20px',
-                fontWeight: 700,
+              <p className="text-heading-3" style={{
                 margin: 0,
                 color: todaySummary.profit >= 0 ? 'var(--color-positive)' : 'var(--color-problem)',
               }}>
@@ -138,52 +135,28 @@ export default function HomeScreen() {
       {topInsight && <InsightCard insight={topInsight} />}
 
       {/* Quick Add Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-md)' }}>
+      <div className="quick-add-row">
         <button
           onClick={() => setShowEntry('sale')}
-          className="card"
-          style={{
-            padding: 'var(--space-lg)',
-            textAlign: 'center',
-            cursor: 'pointer',
-            border: '1px solid var(--color-border)',
-          }}
+          className="quick-add-button"
         >
-          <div style={{ fontSize: '32px', marginBottom: 'var(--space-xs)' }}>💰</div>
-          <p style={{ fontSize: '14px', fontWeight: 600, margin: 0 }}>
-            {lang === 'hi' ? 'बिक्री' : 'Sale'}
-          </p>
+          <span className="icon">💰</span>
+          <span className="label">{lang === 'hi' ? 'बिक्री' : 'Sale'}</span>
         </button>
         <button
           onClick={() => setShowEntry('expense')}
-          className="card"
-          style={{
-            padding: 'var(--space-lg)',
-            textAlign: 'center',
-            cursor: 'pointer',
-            border: '1px solid var(--color-border)',
-          }}
+          className="quick-add-button"
         >
-          <div style={{ fontSize: '32px', marginBottom: 'var(--space-xs)' }}>💸</div>
-          <p style={{ fontSize: '14px', fontWeight: 600, margin: 0 }}>
-            {lang === 'hi' ? 'खर्चा' : 'Expense'}
-          </p>
+          <span className="icon">💸</span>
+          <span className="label">{lang === 'hi' ? 'खर्चा' : 'Expense'}</span>
         </button>
         <button
           onClick={() => setShowEntry('udhaar')}
-          className="card"
-          style={{
-            padding: 'var(--space-lg)',
-            textAlign: 'center',
-            cursor: 'pointer',
-            border: '1px solid var(--color-border)',
-            position: 'relative',
-          }}
+          className="quick-add-button"
+          style={{ position: 'relative' }}
         >
-          <div style={{ fontSize: '32px', marginBottom: 'var(--space-xs)' }}>📒</div>
-          <p style={{ fontSize: '14px', fontWeight: 600, margin: 0 }}>
-            {lang === 'hi' ? 'उधार' : 'Udhaar'}
-          </p>
+          <span className="icon">📒</span>
+          <span className="label">{lang === 'hi' ? 'उधार' : 'Udhaar'}</span>
           {pendingUdhaar.length > 0 && (
             <div style={{
               position: 'absolute',

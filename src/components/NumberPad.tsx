@@ -38,60 +38,35 @@ export default function NumberPad({ value, onChange, onSubmit, maxDigits = 7 }: 
       {/* Display */}
       <div style={{
         textAlign: 'center',
-        padding: 'var(--space-lg)',
-        marginBottom: 'var(--space-md)',
+        padding: 'var(--space-6)',
+        marginBottom: 'var(--space-4)',
       }}>
-        <p style={{
-          fontSize: '14px',
+        <p className="text-body-sm" style={{
           color: 'var(--color-text-secondary)',
-          margin: '0 0 var(--space-xs) 0',
+          margin: '0 0 var(--space-2) 0',
         }}>
           Amount
         </p>
-        <p style={{
-          fontSize: '48px',
-          fontWeight: 800,
+        <p className="text-number" style={{
           color: 'var(--color-text)',
           margin: 0,
-          fontVariantNumeric: 'tabular-nums',
-          letterSpacing: '-0.02em',
         }}>
           {formatDisplay(value)}
         </p>
       </div>
 
       {/* Keypad */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr',
-        gap: 'var(--space-sm)',
-        padding: '0 var(--space-md)',
-      }}>
+      <div className="number-pad">
         {keys.map((row, rowIndex) =>
           row.map((key) => (
             <button
               key={`${rowIndex}-${key}`}
               onClick={() => handleKey(key)}
+              className="number-pad-key"
               style={{
-                height: '64px',
-                border: 'none',
-                borderRadius: 'var(--radius-lg)',
-                backgroundColor: key === 'done' ? 'var(--color-primary)' : 'var(--color-bg-card)',
-                color: key === 'done' ? 'white' : 'var(--color-text)',
-                fontSize: key === 'backspace' ? '20px' : '28px',
-                fontWeight: 600,
-                fontFamily: 'var(--font-family)',
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow-card)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'transform 0.1s ease',
+                backgroundColor: key === 'done' ? 'var(--color-primary)' : undefined,
+                color: key === 'done' ? 'white' : undefined,
               }}
-              onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
-              onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-              onTouchStart={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
-              onTouchEnd={(e) => (e.currentTarget.style.transform = 'scale(1)')}
             >
               {key === 'backspace' ? '⌫' : key === 'done' ? '✓' : key}
             </button>

@@ -33,11 +33,11 @@ export default function TopBar({ isOffline, onProfileClick }: TopBarProps) {
         </div>
       )}
       <header style={{
+        height: 'var(--top-bar-height)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 'var(--space-md) var(--space-lg)',
-        paddingTop: 'var(--space-lg)',
+        padding: '0 var(--screen-margin)',
       }}>
         {/* Left: Greeting */}
         <div>
@@ -50,7 +50,7 @@ export default function TopBar({ isOffline, onProfileClick }: TopBarProps) {
         </div>
 
         {/* Right: Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
           {/* Alerts bell */}
           <button
             onClick={openAlerts}
