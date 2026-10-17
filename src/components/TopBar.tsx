@@ -4,9 +4,10 @@ import { useTranslation } from '../hooks/useTranslation';
 
 interface TopBarProps {
   isOffline: boolean;
+  onProfileClick: () => void;
 }
 
-export default function TopBar({ isOffline }: TopBarProps) {
+export default function TopBar({ isOffline, onProfileClick }: TopBarProps) {
   const { state, dispatch } = useApp();
   const { t } = useTranslation();
 
@@ -93,6 +94,7 @@ export default function TopBar({ isOffline }: TopBarProps) {
 
           {/* Profile */}
           <button
+            onClick={onProfileClick}
             aria-label="Profile"
             style={{
               width: 'var(--touch-target)',

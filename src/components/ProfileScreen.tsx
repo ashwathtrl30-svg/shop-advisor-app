@@ -1,0 +1,298 @@
+import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
+import { useTranslation } from '../hooks/useTranslation';
+
+export default function ProfileScreen() {
+  const { state, dispatch } = useApp();
+  const { lang } = useTranslation();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showPinSetup, setShowPinSetup] = useState(false);
+  const [pin, setPin] = useState('');
+
+  const handleBack = () => {
+    dispatch({ type: 'SET_SCREEN', payload: 'main' });
+  };
+
+  const handleExportData = () => {
+    const data = {
+      shopProfile: state.shopProfile,
+      shopData: state.shopData,
+      insightHistory: state.insightHistory,
+      lessonProgress: state.lessonProgress,
+      exportDate: new Date().toISOString(),
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dukaandost-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDeleteData = () => {
+    if (showDeleteConfirm) {
+      // Reset to initial state
+      localStorage.removeItem('dukaandost-state');
+      window.location.reload();
+    } else {
+      setShowDeleteConfirm(true);
+    }
+  };
+
+  const handleSetPin = () => {
+    if (pin.length === 4) {
+      // Store PIN in localStorage (in real app, would use secure storage)
+      localStorage.setItem('dukaandost-pin', pin);
+      setShowPinSetup(false);
+      setPin('');
+      alert(lang === 'hi' ? 'PIN सेट हो गया' : 'PIN set successfully');
+    }
+  };
+
+  const handleRemovePin = () => {
+    localStorage.removeItem('dukaandost-pin');
+    alert(lang === 'hi' ? 'PIN हटा दिया' : 'PIN removed');
+  };
+
+  const handleLanguageChange = (newLang: 'en' | 'hi') => {
+    dispatch({ type: 'SET_LANGUAGE', payload: newLang });
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'var(--color-bg)',
+      paddingBottom: 'var(--space-xl)',
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: 'var(--space-md) var(--space-lg)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 'var(--space-md)',
+        borderBottom: '1px solid var(--color-border)',
+      }}>
+        <button onClick={handleBack} className="btn-ghost" style={{ minWidth: 'auto', padding: '8px' }}>
+          ←
+        </button>
+        <h1 className="text-heading-1" style={{ margin: 0 }}>
+          👤 {lang === 'hi' ? 'प्रोफ़ाइल' : 'Profile'}
+        </h1>
+      </div>
+
+      <div style={{ padding: 'var(--space-lg)' }}>
+        {/* Shop Info */}
+        <div className="card" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--color-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '32px',
+            }}>
+              🏪
+            </div>
+            <div>
+              <p className="text-heading-2" style={{ margin: 0 }}>
+                {state.shopProfile.shopName || (lang === 'hi' ? 'मेरी दुकान' : 'My Shop')}
+              </p>
+              <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', margin: '4px 0 0 0' }}>
+                {state.phoneNumber}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Settings */}
+        <div className="card" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-lg)' }}>
+          <h2 className="text-heading-2" style={{ margin: '0 0 var(--space-md) 0' }}>
+            {lang === 'hi' ? 'सेटिंग्स' : 'Settings'}
+          </h2>
+
+          {/* Language */}
+          <div style={{ marginBottom: 'var(--space-md)' }}>
+            <p className="text-body-md" style={{ margin: '0 0 var(--space-sm) 0', fontWeight: 600 }}>
+              {lang === 'hi' ? 'भाषा' : 'Language'}
+            </p>
+            <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+              <button
+                onClick={() => handleLanguageChange('en')}
+                className={lang === 'en' ? 'btn-primary' : 'btn-secondary'}
+                style={{ flex: 1, padding: 'var(--space-sm)' }}
+              >
+                English
+              </button>
+              <button
+                onClick={() => handleLanguageChange('hi')}
+                className={lang === 'hi' ? 'btn-primary' : 'btn-secondary'}
+                style={{ flex: 1, padding: 'var(--space-sm)' }}
+              >
+                हिंदी
+              </button>
+            </div>
+          </div>
+
+          {/* Dark Mode */}
+          <div style={{ marginBottom: 'var(--space-md)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <p className="text-body-md" style={{ margin: 0, fontWeight: 600 }}>
+                {lang === 'hi' ? 'डार्क मोड' : 'Dark Mode'}
+              </p>
+              <button
+                onClick={() => dispatch({ type: 'TOGGLE_DARK_MODE' })}
+                style={{
+                  width: '60px',
+                  height: '32px',
+                  borderRadius: '16px',
+                  backgroundColor: state.darkMode ? 'var(--color-primary)' : 'var(--color-border)',
+                  position: 'relative',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <div style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  backgroundColor: 'white',
+                  position: 'absolute',
+                  top: '4px',
+                  left: state.darkMode ? '32px' : '4px',
+                  transition: 'left 0.2s',
+                }} />
+              </button>
+            </div>
+          </div>
+
+          {/* PIN Lock */}
+          <div style={{ marginBottom: 'var(--space-md)' }}>
+            <p className="text-body-md" style={{ margin: '0 0 var(--space-sm) 0', fontWeight: 600 }}>
+              {lang === 'hi' ? 'PIN लॉक' : 'PIN Lock'}
+            </p>
+            {localStorage.getItem('dukaandost-pin') ? (
+              <button
+                onClick={handleRemovePin}
+                className="btn-secondary"
+                style={{ width: '100%', padding: 'var(--space-sm)' }}
+              >
+                {lang === 'hi' ? 'PIN हटाएं' : 'Remove PIN'}
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowPinSetup(true)}
+                className="btn-secondary"
+                style={{ width: '100%', padding: 'var(--space-sm)' }}
+              >
+                {lang === 'hi' ? 'PIN सेट करें' : 'Set PIN'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Data Management */}
+        <div className="card" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-lg)' }}>
+          <h2 className="text-heading-2" style={{ margin: '0 0 var(--space-md) 0' }}>
+            {lang === 'hi' ? 'डेटा' : 'Data'}
+          </h2>
+
+          <button
+            onClick={handleExportData}
+            className="btn-secondary"
+            style={{ width: '100%', marginBottom: 'var(--space-sm)', padding: 'var(--space-sm)' }}
+          >
+            📥 {lang === 'hi' ? 'डेटा एक्सपोर्ट करें' : 'Export Data'}
+          </button>
+
+          <button
+            onClick={handleDeleteData}
+            className={showDeleteConfirm ? 'btn-problem' : 'btn-secondary'}
+            style={{ width: '100%', padding: 'var(--space-sm)' }}
+          >
+            🗑️ {showDeleteConfirm 
+              ? (lang === 'hi' ? 'पक्का डिलीट करें?' : 'Confirm Delete?')
+              : (lang === 'hi' ? 'सारा डेटा डिलीट करें' : 'Delete All Data')}
+          </button>
+        </div>
+
+        {/* Privacy & Help */}
+        <div className="card" style={{ padding: 'var(--space-lg)' }}>
+          <button
+            onClick={() => dispatch({ type: 'SET_SCREEN', payload: 'privacy' })}
+            className="btn-ghost"
+            style={{ width: '100%', marginBottom: 'var(--space-sm)', justifyContent: 'flex-start' }}
+          >
+            🔒 {lang === 'hi' ? 'प्राइवेसी पॉलिसी' : 'Privacy Policy'}
+          </button>
+
+          <button
+            onClick={() => dispatch({ type: 'SET_SCREEN', payload: 'help' })}
+            className="btn-ghost"
+            style={{ width: '100%', justifyContent: 'flex-start' }}
+          >
+            ❓ {lang === 'hi' ? 'मदद' : 'Help'}
+          </button>
+        </div>
+      </div>
+
+      {/* PIN Setup Modal */}
+      {showPinSetup && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div className="card" style={{ padding: 'var(--space-lg)', maxWidth: '400px', width: '90%' }}>
+            <h2 className="text-heading-2" style={{ margin: '0 0 var(--space-md) 0' }}>
+              {lang === 'hi' ? '4 अंकों का PIN डालें' : 'Enter 4-digit PIN'}
+            </h2>
+            <input
+              type="password"
+              maxLength={4}
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+              style={{
+                width: '100%',
+                padding: 'var(--space-md)',
+                fontSize: '24px',
+                textAlign: 'center',
+                letterSpacing: '8px',
+                marginBottom: 'var(--space-md)',
+              }}
+              autoFocus
+            />
+            <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+              <button
+                onClick={() => { setShowPinSetup(false); setPin(''); }}
+                className="btn-secondary"
+                style={{ flex: 1 }}
+              >
+                {lang === 'hi' ? 'रद्द करें' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleSetPin}
+                className="btn-primary"
+                style={{ flex: 1 }}
+                disabled={pin.length !== 4}
+              >
+                {lang === 'hi' ? 'सेट करें' : 'Set'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -20,6 +20,9 @@ import AskScreen from './components/AskScreen';
 import ToolsScreen from './components/tools/ToolsScreen';
 import LearnScreen from './components/learn/LearnScreen';
 import AlertsScreen from './components/AlertsScreen';
+import PrivacyScreen from './components/PrivacyScreen';
+import HelpScreen from './components/HelpScreen';
+import ProfileScreen from './components/ProfileScreen';
 import UndoBar from './components/UndoBar';
 
 function AppContent() {
@@ -97,9 +100,18 @@ function AppContent() {
 
   // Main app (after onboarding)
   const renderMainScreen = () => {
-    // Check if we're showing alerts screen
+    // Check if we're showing special screens
     if (state.showScreen === 'alerts') {
       return <AlertsScreen />;
+    }
+    if (state.showScreen === 'privacy') {
+      return <PrivacyScreen />;
+    }
+    if (state.showScreen === 'help') {
+      return <HelpScreen />;
+    }
+    if (state.showScreen === 'profile') {
+      return <ProfileScreen />;
     }
 
     switch (state.activeTab) {
@@ -127,7 +139,7 @@ function AppContent() {
       backgroundColor: 'var(--color-bg)',
     }}>
       {/* Top Bar */}
-      <TopBar isOffline={isOffline} />
+      <TopBar isOffline={isOffline} onProfileClick={() => dispatch({ type: 'SET_SCREEN', payload: 'profile' })} />
 
       {/* Main Content */}
       <main className="content-with-nav">

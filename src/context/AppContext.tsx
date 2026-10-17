@@ -51,7 +51,7 @@ export interface AppState {
     festivals: boolean;
     dailyReminder: boolean;
   };
-  showScreen: 'main' | 'alerts';
+  showScreen: 'main' | 'alerts' | 'privacy' | 'help' | 'profile';
 }
 
 // Actions
@@ -83,7 +83,7 @@ type Action =
   | { type: 'COMPLETE_LESSON'; payload: string }
   | { type: 'SET_QUIZ_SCORE'; payload: { lessonId: string; score: number } }
   | { type: 'TOGGLE_ALERT'; payload: keyof AppState['alertsEnabled'] }
-  | { type: 'SET_SCREEN'; payload: 'main' | 'alerts' }
+  | { type: 'SET_SCREEN'; payload: 'main' | 'alerts' | 'privacy' | 'help' | 'profile' }
   | { type: 'LOAD_STATE'; payload: Partial<AppState> };
 
 const initialShopData: ShopData = {
