@@ -279,19 +279,3 @@ function generateCustomerAnswer(profile: ShopProfile, lang: Language): string {
     ? `नए ग्राहक लाने के लिए:\n\n${tips}\n\n**सबसे ज़रूरी:** पहले 3 काम करें, फिर बाकी। एक साथ सब मत करें।`
     : `To get new customers:\n\n${tips}\n\n**Most important:** Do the first 3 first, then the rest. Don't do everything at once.`;
 }
-
-// Text-to-speech
-export function speakText(text: string, lang: Language): void {
-  if ('speechSynthesis' in window) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
-    utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
-  }
-}
-
-export function stopSpeaking(): void {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-  }
-}

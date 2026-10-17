@@ -14,7 +14,6 @@ export default function LessonCard({ lesson, onBack }: LessonCardProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
-  const [isSpeaking, setIsSpeaking] = useState(false);
 
   const slides = lesson.content[lang];
   const totalSlides = slides.length;
@@ -47,21 +46,6 @@ export default function LessonCard({ lesson, onBack }: LessonCardProps) {
     }
   };
 
-  const handleSpeak = () => {
-    if ('speechSynthesis' in window) {
-      if (isSpeaking) {
-        window.speechSynthesis.cancel();
-        setIsSpeaking(false);
-      } else {
-        const utterance = new SpeechSynthesisUtterance(slides[currentSlide]);
-        utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
-        utterance.onend = () => setIsSpeaking(false);
-        window.speechSynthesis.speak(utterance);
-        setIsSpeaking(true);
-      }
-    }
-  };
-
   const handleTryIt = () => {
     // Navigate to the matching tool
     dispatch({ type: 'SET_TAB', payload: 'tools' });
@@ -91,14 +75,6 @@ export default function LessonCard({ lesson, onBack }: LessonCardProps) {
             {lesson.emoji} {lesson.title[lang]}
           </p>
         </div>
-        <button
-          onClick={handleSpeak}
-          className="btn-ghost"
-          style={{ minWidth: 'auto', padding: '8px' }}
-          title={lang === 'hi' ? 'सुनें' : 'Listen'}
-        >
-          {isSpeaking ? '⏸️' : '🔊'}
-        </button>
       </div>
 
       {/* Progress Bar */}

@@ -131,7 +131,6 @@ export const translations = {
     homeProfit: 'Profit',
     homeSmartTip: 'Smart Tip',
     homeAddNumbers: 'Add Today\'s Numbers',
-    homeVoice: 'Or tell me by voice',
     homeMoreThanYesterday: 'more than yesterday',
     
     // Bottom Nav
@@ -143,7 +142,6 @@ export const translations = {
     
     // Common
     or: 'or',
-    voiceInput: 'Voice input',
     loading: 'Loading...',
     error: 'Something went wrong',
     retry: 'Try again',
@@ -161,13 +159,6 @@ export const translations = {
     whatSold: 'What was sold?',
     optional: 'optional',
     save: 'Save',
-    enterByVoice: 'Enter by voice',
-    tellByVoice: 'Tell me by voice',
-    sayExample: 'Say: "aaj 4500 ka maal bika" or "5000 ki bikri"',
-    listening: 'Listening...',
-    iHeard: 'I heard:',
-    thisIsCorrect: 'This is correct',
-    typeInstead: 'Type instead',
     whatFor: 'What was it for?',
     stockPurchase: 'Stock Purchase',
     rent: 'Rent',
@@ -331,7 +322,6 @@ export const translations = {
     homeProfit: 'मुनाफ़ा',
     homeSmartTip: 'स्मार्ट टिप',
     homeAddNumbers: 'आज के नंबर डालें',
-    homeVoice: 'या आवाज़ से बताएं',
     homeMoreThanYesterday: 'कल से ज़्यादा',
     
     // Bottom Nav
@@ -343,7 +333,6 @@ export const translations = {
     
     // Common
     or: 'या',
-    voiceInput: 'आवाज़ से',
     loading: 'लोड हो रहा है...',
     error: 'कुछ गड़बड़ हो गई',
     retry: 'फिर कोशिश करें',
@@ -361,13 +350,6 @@ export const translations = {
     whatSold: 'क्या बिका?',
     optional: 'वैकल्पिक',
     save: 'सेव करें',
-    enterByVoice: 'आवाज़ से डालें',
-    tellByVoice: 'बोलकर बताएं',
-    sayExample: 'बोलें: "आज 4500 का माल बिका" या "5000 की बिक्री"',
-    listening: 'सुन रहा हूँ...',
-    iHeard: 'मैंने सुना:',
-    thisIsCorrect: 'यह सही है',
-    typeInstead: 'टाइप करके डालें',
     whatFor: 'किस पर खर्चा?',
     stockPurchase: 'सामान खरीदा',
     rent: 'किराया',

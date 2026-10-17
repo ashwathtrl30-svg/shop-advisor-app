@@ -1,14 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../hooks/useTranslation';
-import { useVoiceInput } from '../hooks/useVoiceInput';
 import { 
   Message, 
   Conversation, 
   generateSuggestedQuestions, 
-  generateAnswer, 
-  speakText, 
-  stopSpeaking 
+  generateAnswer
 } from '../models/conversation';
 
 export default function AskScreen() {
@@ -16,11 +13,8 @@ export default function AskScreen() {
   const { t, lang } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const { isListening, transcript, startListening, stopListening, isSupported } = useVoiceInput();
 
   // Generate suggested questions on mount
   useEffect(() => {
@@ -32,13 +26,6 @@ export default function AskScreen() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  // Handle voice input
-  useEffect(() => {
-    if (transcript && !isListening) {
-      handleSendMessage(transcript);
-    }
-  }, [transcript, isListening]);
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
@@ -75,17 +62,6 @@ export default function AskScreen() {
     setTimeout(() => {
       setMessages(prev => [...prev, assistantMessage]);
     }, 500);
-  };
-
-  const handleSpeak = (text: string) => {
-    if (isSpeaking) {
-      stopSpeaking();
-      setIsSpeaking(false);
-    } else {
-      speakText(text, lang);
-      setIsSpeaking(true);
-      setTimeout(() => setIsSpeaking(false), 5000);
-    }
   };
 
   const handleFeedback = (messageId: string, feedback: 'helpful' | 'not_helpful') => {
@@ -164,20 +140,6 @@ export default function AskScreen() {
               
               {msg.role === 'assistant' && (
                 <div style={{ marginTop: 'var(--space-sm)', display: 'flex', gap: 'var(--space-sm)' }}>
-                  <button
-                    onClick={() => handleSpeak(msg.content)}
-                    style={{
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '18px',
-                      padding: '4px',
-                    }}
-                    title={lang === 'hi' ? 'बोलकर सुनाएं' : 'Read aloud'}
-                  >
-                    {isSpeaking ? '⏸️' : '🔊'}
-                  </button>
-                  
                   {!msg.feedback && (
                     <>
                       <button
@@ -281,33 +243,9 @@ export default function AskScreen() {
             color: 'var(--color-text)',
             fontSize: '16px',
             fontFamily: 'var(--font-family)',
-            outline: 'none',
-          }}
-        />
-
-        {/* Voice Button */}
-        {isSupported && (
-          <button
-            onClick={isListening ? stopListening : startListening}
-            style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              backgroundColor: isListening ? 'var(--color-problem)' : 'var(--color-primary)',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '24px',
-              boxShadow: 'var(--shadow-button)',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            {isListening ? '⏹️' : '🎤'}
-          </button>
-        )}
-      </div>
-    </div>
+          outline: 'none',
+        }}
+      />
+    </div>    </div>
   );
 }

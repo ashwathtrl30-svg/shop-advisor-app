@@ -23,7 +23,6 @@ export const pricingPlans: PricingPlan[] = [
         'Get smart insights and tips',
         '12 business tools',
         '10 lessons in Hindi and English',
-        'Voice input and output',
         'Offline support',
         'Data export and backup',
         'No ads, ever'
@@ -33,7 +32,6 @@ export const pricingPlans: PricingPlan[] = [
         'स्मार्ट सलाह और टिप्स पाएं',
         '12 बिज़नेस टूल्स',
         '10 पाठ हिंदी और अंग्रेज़ी में',
-        'आवाज़ से इनपुट और आउटपुट',
         'ऑफ़लाइन सपोर्ट',
         'डेटा एक्सपोर्ट और बैकअप',
         'कोई विज्ञापन नहीं, कभी नहीं'
