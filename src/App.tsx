@@ -17,6 +17,7 @@ import BottomNav from './components/BottomNav';
 import HomeScreen from './components/HomeScreen';
 import InsightsScreen from './components/InsightsScreen';
 import AskScreen from './components/AskScreen';
+import ToolsScreen from './components/tools/ToolsScreen';
 import UndoBar from './components/UndoBar';
 
 function AppContent() {
@@ -102,11 +103,7 @@ function AppContent() {
       case 'ask':
         return <AskScreen />;
       case 'tools':
-        return <PlaceholderScreen emoji="🧰" title={t('navTools')} subtitle={
-          state.language === 'hi'
-            ? 'आपकी दुकान के लिए आसान टूल्स — स्टॉक चेक, उधार रिमाइंडर, डेली रिपोर्ट।'
-            : 'Simple tools for your shop — stock check, udhaar reminder, daily report.'
-        } />;
+        return <ToolsScreen />;
       case 'learn':
         return <PlaceholderScreen emoji="📚" title={t('navLearn')} subtitle={
           state.language === 'hi'
