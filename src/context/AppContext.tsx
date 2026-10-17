@@ -4,6 +4,7 @@ import { ShopData, SaleEntry, ExpenseEntry, UdhaarEntry, DailyTotal, generateId,
 import { AlertPreferences, InsightHistory } from '../models/insights';
 import { LessonProgress } from '../models/lessons';
 import { saveState, loadState, clearState, StorageError } from '../services/storage';
+import { DailyInsights } from '../services/dailyInsights';
 
 // Shop profile data
 export interface ShopProfile {
@@ -67,6 +68,7 @@ export interface AppState {
   showScreen: 'main' | 'alerts' | 'privacy' | 'help' | 'profile';
   isLoading: boolean;
   storageError: StorageError | null;
+  dailyInsights: DailyInsights[];
 }
 
 // Actions
@@ -101,6 +103,8 @@ type Action =
   | { type: 'SET_SCREEN'; payload: 'main' | 'alerts' | 'privacy' | 'help' | 'profile' }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_STORAGE_ERROR'; payload: StorageError | null }
+  | { type: 'SET_DAILY_INSIGHTS'; payload: DailyInsights[] }
+  | { type: 'RECORD_INSIGHT_FEEDBACK'; payload: { insightId: string; feedback: 'yes' | 'no' } }
   | { type: 'LOAD_STATE'; payload: Partial<AppState> }
   | { type: 'CLEAR_ALL_DATA' };
 
@@ -165,6 +169,7 @@ const initialState: AppState = {
   showScreen: 'main',
   isLoading: true,
   storageError: null,
+  dailyInsights: [],
 };
 
 function reducer(state: AppState, action: Action): AppState {
@@ -388,6 +393,24 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, isLoading: action.payload };
     case 'SET_STORAGE_ERROR':
       return { ...state, storageError: action.payload };
+    case 'SET_DAILY_INSIGHTS':
+      return { ...state, dailyInsights: action.payload };
+    case 'RECORD_INSIGHT_FEEDBACK': {
+      const today = new Date().toISOString().split('T')[0];
+      const updatedInsights = state.dailyInsights.map(day => {
+        if (day.date === today) {
+          return {
+            ...day,
+            feedback: {
+              ...day.feedback,
+              [action.payload.insightId]: action.payload.feedback,
+            },
+          };
+        }
+        return day;
+      });
+      return { ...state, dailyInsights: updatedInsights };
+    }
     case 'CLEAR_ALL_DATA':
       return {
         ...initialState,
