@@ -15,6 +15,7 @@ import TourScreen from './components/onboarding/TourScreen';
 import TopBar from './components/TopBar';
 import BottomNav from './components/BottomNav';
 import HomeScreen from './components/HomeScreen';
+import UndoBar from './components/UndoBar';
 
 function AppContent() {
   const { state, dispatch } = useApp();
@@ -133,6 +134,9 @@ function AppContent() {
         {renderMainScreen()}
       </main>
 
+      {/* Undo Bar */}
+      <UndoBar />
+
       {/* Bottom Navigation */}
       <BottomNav 
         activeTab={state.activeTab} 
@@ -160,7 +164,7 @@ function PlaceholderScreen({ emoji, title, subtitle }: { emoji: string; title: s
         {subtitle}
       </p>
       <p className="text-body-sm" style={{ color: 'var(--color-text-muted)', margin: 0, marginTop: 'var(--space-lg)' }}>
-        Coming in Phase 3
+        Coming in Phase 4
       </p>
     </div>
   );
