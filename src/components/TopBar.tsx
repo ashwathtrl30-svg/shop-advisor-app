@@ -17,6 +17,10 @@ export default function TopBar({ isOffline }: TopBarProps) {
     document.documentElement.classList.toggle('light', !isDark);
   };
 
+  const openAlerts = () => {
+    dispatch({ type: 'SET_SCREEN', payload: 'alerts' });
+  };
+
   // Get shopkeeper name from profile or use default
   const shopName = state.shopProfile.shopName || 'Dost';
 
@@ -46,6 +50,27 @@ export default function TopBar({ isOffline }: TopBarProps) {
 
         {/* Right: Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+          {/* Alerts bell */}
+          <button
+            onClick={openAlerts}
+            aria-label="Alerts"
+            style={{
+              width: 'var(--touch-target)',
+              height: 'var(--touch-target)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'var(--color-bg-card)',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-full)',
+              cursor: 'pointer',
+              fontSize: '20px',
+              position: 'relative',
+            }}
+          >
+            🔔
+          </button>
+
           {/* Dark mode toggle */}
           <button
             onClick={toggleDarkMode}

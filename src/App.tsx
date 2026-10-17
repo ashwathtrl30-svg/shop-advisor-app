@@ -18,6 +18,8 @@ import HomeScreen from './components/HomeScreen';
 import InsightsScreen from './components/InsightsScreen';
 import AskScreen from './components/AskScreen';
 import ToolsScreen from './components/tools/ToolsScreen';
+import LearnScreen from './components/learn/LearnScreen';
+import AlertsScreen from './components/AlertsScreen';
 import UndoBar from './components/UndoBar';
 
 function AppContent() {
@@ -95,6 +97,11 @@ function AppContent() {
 
   // Main app (after onboarding)
   const renderMainScreen = () => {
+    // Check if we're showing alerts screen
+    if (state.showScreen === 'alerts') {
+      return <AlertsScreen />;
+    }
+
     switch (state.activeTab) {
       case 'home':
         return <HomeScreen />;
@@ -105,11 +112,7 @@ function AppContent() {
       case 'tools':
         return <ToolsScreen />;
       case 'learn':
-        return <PlaceholderScreen emoji="📚" title={t('navLearn')} subtitle={
-          state.language === 'hi'
-            ? 'दुकान बढ़ाने के लिए छोटे पाठ। हर एक 2 मिनट। कोई कठिन शब्द नहीं।'
-            : 'Short lessons to grow your shop. 2 minutes each. No jargon.'
-        } />;
+        return <LearnScreen />;
       default:
         return <HomeScreen />;
     }

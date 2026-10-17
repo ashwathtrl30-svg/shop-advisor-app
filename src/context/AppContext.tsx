@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import { Language } from '../i18n/translations';
 import { ShopData, SaleEntry, ExpenseEntry, UdhaarEntry, DailyTotal, generateId, getToday } from '../models/data';
 import { AlertPreferences, InsightHistory } from '../models/insights';
+import { LessonProgress } from '../models/lessons';
 
 // Shop profile data
 export interface ShopProfile {
@@ -43,6 +44,14 @@ export interface AppState {
   lastAction: { type: string; id: string; timestamp: number } | null;
   insightHistory: InsightHistory;
   alertPreferences: AlertPreferences;
+  lessonProgress: LessonProgress;
+  alertsEnabled: {
+    insights: boolean;
+    udhaar: boolean;
+    festivals: boolean;
+    dailyReminder: boolean;
+  };
+  showScreen: 'main' | 'alerts';
 }
 
 // Actions
@@ -71,6 +80,10 @@ type Action =
   | { type: 'SET_INSIGHT_FEEDBACK'; payload: { id: string; feedback: 'yes' | 'no' } }
   | { type: 'UPDATE_INSIGHT_HISTORY'; payload: Partial<InsightHistory> }
   | { type: 'UPDATE_ALERT_PREFERENCES'; payload: Partial<AlertPreferences> }
+  | { type: 'COMPLETE_LESSON'; payload: string }
+  | { type: 'SET_QUIZ_SCORE'; payload: { lessonId: string; score: number } }
+  | { type: 'TOGGLE_ALERT'; payload: keyof AppState['alertsEnabled'] }
+  | { type: 'SET_SCREEN'; payload: 'main' | 'alerts' }
   | { type: 'LOAD_STATE'; payload: Partial<AppState> };
 
 const initialShopData: ShopData = {
@@ -101,6 +114,20 @@ const initialAlertPreferences: AlertPreferences = {
   wins: true,
 };
 
+const initialLessonProgress: LessonProgress = {
+  completed: [],
+  quizScores: {},
+  lastLessonDate: '',
+  streak: 0,
+};
+
+const initialAlertsEnabled = {
+  insights: true,
+  udhaar: true,
+  festivals: true,
+  dailyReminder: true,
+};
+
 const initialState: AppState = {
   language: null,
   onboardingStep: 'language',
@@ -115,6 +142,9 @@ const initialState: AppState = {
   lastAction: null,
   insightHistory: initialInsightHistory,
   alertPreferences: initialAlertPreferences,
+  lessonProgress: initialLessonProgress,
+  alertsEnabled: initialAlertsEnabled,
+  showScreen: 'main',
 };
 
 function reducer(state: AppState, action: Action): AppState {
@@ -294,6 +324,46 @@ function reducer(state: AppState, action: Action): AppState {
         ...state,
         alertPreferences: { ...state.alertPreferences, ...action.payload },
       };
+    case 'COMPLETE_LESSON':
+      const lessonId = action.payload;
+      const alreadyCompleted = state.lessonProgress.completed.includes(lessonId);
+      const today = getToday();
+      const wasLastLessonToday = state.lessonProgress.lastLessonDate === today;
+      
+      return {
+        ...state,
+        lessonProgress: {
+          ...state.lessonProgress,
+          completed: alreadyCompleted 
+            ? state.lessonProgress.completed 
+            : [...state.lessonProgress.completed, lessonId],
+          lastLessonDate: today,
+          streak: wasLastLessonToday 
+            ? state.lessonProgress.streak 
+            : state.lessonProgress.streak + 1,
+        },
+      };
+    case 'SET_QUIZ_SCORE':
+      return {
+        ...state,
+        lessonProgress: {
+          ...state.lessonProgress,
+          quizScores: {
+            ...state.lessonProgress.quizScores,
+            [action.payload.lessonId]: action.payload.score,
+          },
+        },
+      };
+    case 'TOGGLE_ALERT':
+      return {
+        ...state,
+        alertsEnabled: {
+          ...state.alertsEnabled,
+          [action.payload]: !state.alertsEnabled[action.payload],
+        },
+      };
+    case 'SET_SCREEN':
+      return { ...state, showScreen: action.payload };
     case 'LOAD_STATE':
       return { ...state, ...action.payload };
     default:
