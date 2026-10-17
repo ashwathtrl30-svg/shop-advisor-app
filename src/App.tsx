@@ -152,7 +152,12 @@ function AppContent() {
       {/* Bottom Navigation */}
       <BottomNav 
         activeTab={state.activeTab} 
-        onTabChange={(tab) => dispatch({ type: 'SET_TAB', payload: tab })} 
+        onTabChange={(tab) => {
+          // Reset showScreen to 'main' when switching tabs
+          // This closes Profile, Alerts, Privacy, Help overlays
+          dispatch({ type: 'SET_SCREEN', payload: 'main' });
+          dispatch({ type: 'SET_TAB', payload: tab });
+        }} 
       />
     </div>
   );

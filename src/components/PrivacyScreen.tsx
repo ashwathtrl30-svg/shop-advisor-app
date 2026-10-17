@@ -3,12 +3,11 @@ import { useApp } from '../context/AppContext';
 import { useTranslation } from '../hooks/useTranslation';
 
 export default function PrivacyScreen() {
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
   const { lang } = useTranslation();
 
   const handleBack = () => {
-    // Navigate back to profile
-    window.history.back();
+    dispatch({ type: 'SET_SCREEN', payload: 'main' });
   };
 
   return (
