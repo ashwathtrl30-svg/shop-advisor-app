@@ -1,14 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { AppProvider, useApp } from './context/AppContext';
+import { useTranslation } from './hooks/useTranslation';
+
+// Onboarding screens
+import LanguageScreen from './components/onboarding/LanguageScreen';
+import WelcomeScreen from './components/onboarding/WelcomeScreen';
+import PhoneScreen from './components/onboarding/PhoneScreen';
+import OTPScreen from './components/onboarding/OTPScreen';
+import InterviewScreen from './components/onboarding/InterviewScreen';
+import ProfileSummaryScreen from './components/onboarding/ProfileSummaryScreen';
+import TourScreen from './components/onboarding/TourScreen';
+
+// Main app screens
 import TopBar from './components/TopBar';
 import BottomNav from './components/BottomNav';
 import HomeScreen from './components/HomeScreen';
-import DesignSystemShowcase from './components/DesignSystemShowcase';
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState('home');
-  const [darkMode, setDarkMode] = useState(false);
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [showDesignSystem, setShowDesignSystem] = useState(false);
+function AppContent() {
+  const { state, dispatch } = useApp();
+  const { t } = useTranslation();
+  const [isOffline, setIsOffline] = React.useState(!navigator.onLine);
 
   // Listen for online/offline events
   useEffect(() => {
@@ -24,40 +35,83 @@ export default function App() {
     };
   }, []);
 
-  // Dark mode toggle
-  const toggleDarkMode = () => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    document.documentElement.classList.toggle('dark', newMode);
-    document.documentElement.classList.toggle('light', !newMode);
-  };
-
   // Initialize dark mode from system preference
   useEffect(() => {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) {
-      setDarkMode(true);
+    if (prefersDark && !state.language) {
+      dispatch({ type: 'TOGGLE_DARK_MODE' });
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
-    } else {
+    } else if (!state.language) {
       document.documentElement.classList.add('light');
     }
   }, []);
 
-  const renderScreen = () => {
-    if (showDesignSystem) {
-      return <DesignSystemShowcase />;
-    }
+  // Apply dark mode when state changes
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', state.darkMode);
+    document.documentElement.classList.toggle('light', !state.darkMode);
+  }, [state.darkMode]);
 
-    switch (activeTab) {
+  // Render onboarding screens
+  const renderOnboarding = () => {
+    switch (state.onboardingStep) {
+      case 'language':
+        return <LanguageScreen />;
+      case 'welcome':
+        return <WelcomeScreen />;
+      case 'phone':
+        return <PhoneScreen />;
+      case 'otp':
+        return <OTPScreen />;
+      case 'interview':
+        return <InterviewScreen questionNumber={state.currentQuestion} />;
+      case 'profile-summary':
+        return <ProfileSummaryScreen />;
+      case 'tour':
+        return <TourScreen />;
+      default:
+        return null;
+    }
+  };
+
+  // If onboarding is not complete, show onboarding flow
+  if (state.onboardingStep !== 'complete') {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        maxWidth: '480px',
+        margin: '0 auto',
+        backgroundColor: 'var(--color-bg)',
+      }}>
+        {renderOnboarding()}
+      </div>
+    );
+  }
+
+  // Main app (after onboarding)
+  const renderMainScreen = () => {
+    switch (state.activeTab) {
       case 'home':
         return <HomeScreen />;
       case 'ask':
-        return <PlaceholderScreen emoji="💬" title="Ask Anything" subtitle="Type or speak your question. I'll give you a simple answer based on your shop's data." />;
+        return <PlaceholderScreen emoji="💬" title={t('navAsk')} subtitle={
+          state.language === 'hi' 
+            ? 'अपने शब्दों में सवाल पूछें। मैं सरल जवाब दूंगा।'
+            : 'Type or speak your question. I\'ll give you a simple answer.'
+        } />;
       case 'tools':
-        return <PlaceholderScreen emoji="🧰" title="Tools" subtitle="Simple tools for your shop — stock check, udhaar reminder, daily report." />;
+        return <PlaceholderScreen emoji="🧰" title={t('navTools')} subtitle={
+          state.language === 'hi'
+            ? 'आपकी दुकान के लिए आसान टूल्स — स्टॉक चेक, उधार रिमाइंडर, डेली रिपोर्ट।'
+            : 'Simple tools for your shop — stock check, udhaar reminder, daily report.'
+        } />;
       case 'learn':
-        return <PlaceholderScreen emoji="📚" title="Learn" subtitle="Short lessons to grow your shop. 2 minutes each. No jargon." />;
+        return <PlaceholderScreen emoji="📚" title={t('navLearn')} subtitle={
+          state.language === 'hi'
+            ? 'दुकान बढ़ाने के लिए छोटे पाठ। हर एक 2 मिनट। कोई कठिन शब्द नहीं।'
+            : 'Short lessons to grow your shop. 2 minutes each. No jargon.'
+        } />;
       default:
         return <HomeScreen />;
     }
@@ -72,37 +126,18 @@ export default function App() {
       backgroundColor: 'var(--color-bg)',
     }}>
       {/* Top Bar */}
-      <TopBar darkMode={darkMode} onToggleDark={toggleDarkMode} isOffline={isOffline} />
-
-      {/* Design System Toggle (for demo purposes) */}
-      <div style={{ padding: '0 var(--space-lg)', marginBottom: 'var(--space-sm)' }}>
-        <button
-          onClick={() => setShowDesignSystem(!showDesignSystem)}
-          style={{
-            background: showDesignSystem ? 'var(--color-accent)' : 'var(--color-primary-light)',
-            color: showDesignSystem ? 'white' : 'var(--color-primary)',
-            border: 'none',
-            borderRadius: 'var(--radius-full)',
-            padding: '6px 16px',
-            fontSize: '13px',
-            fontWeight: 600,
-            fontFamily: 'var(--font-family)',
-            cursor: 'pointer',
-          }}
-        >
-          {showDesignSystem ? '← Back to App' : '🎨 View Design System'}
-        </button>
-      </div>
+      <TopBar isOffline={isOffline} />
 
       {/* Main Content */}
       <main className="content-with-nav">
-        {renderScreen()}
+        {renderMainScreen()}
       </main>
 
       {/* Bottom Navigation */}
-      {!showDesignSystem && (
-        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-      )}
+      <BottomNav 
+        activeTab={state.activeTab} 
+        onTabChange={(tab) => dispatch({ type: 'SET_TAB', payload: tab })} 
+      />
     </div>
   );
 }
@@ -125,8 +160,16 @@ function PlaceholderScreen({ emoji, title, subtitle }: { emoji: string; title: s
         {subtitle}
       </p>
       <p className="text-body-sm" style={{ color: 'var(--color-text-muted)', margin: 0, marginTop: 'var(--space-lg)' }}>
-        Coming in Phase 2
+        Coming in Phase 3
       </p>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   );
 }

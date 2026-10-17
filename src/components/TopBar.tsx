@@ -1,17 +1,30 @@
 import React from 'react';
+import { useApp } from '../context/AppContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface TopBarProps {
-  darkMode: boolean;
-  onToggleDark: () => void;
   isOffline: boolean;
 }
 
-export default function TopBar({ darkMode, onToggleDark, isOffline }: TopBarProps) {
+export default function TopBar({ isOffline }: TopBarProps) {
+  const { state, dispatch } = useApp();
+  const { t } = useTranslation();
+
+  const toggleDarkMode = () => {
+    dispatch({ type: 'TOGGLE_DARK_MODE' });
+    const isDark = !state.darkMode;
+    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.classList.toggle('light', !isDark);
+  };
+
+  // Get shopkeeper name from profile or use default
+  const shopName = state.shopProfile.shopName || 'Dost';
+
   return (
     <>
       {isOffline && (
         <div className="offline-banner" role="alert">
-          📡 No internet — you can still use the app offline
+          📡 {t('offline')}
         </div>
       )}
       <header style={{
@@ -24,10 +37,10 @@ export default function TopBar({ darkMode, onToggleDark, isOffline }: TopBarProp
         {/* Left: Greeting */}
         <div>
           <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
-            Namaste 🙏
+            {t('homeGreeting')} 🙏
           </p>
           <h1 className="text-heading-2" style={{ margin: 0 }}>
-            Ramesh ji
+            {shopName}
           </h1>
         </div>
 
@@ -35,8 +48,8 @@ export default function TopBar({ darkMode, onToggleDark, isOffline }: TopBarProp
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
           {/* Dark mode toggle */}
           <button
-            onClick={onToggleDark}
-            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            onClick={toggleDarkMode}
+            aria-label={state.darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             style={{
               width: 'var(--touch-target)',
               height: 'var(--touch-target)',
@@ -50,7 +63,7 @@ export default function TopBar({ darkMode, onToggleDark, isOffline }: TopBarProp
               fontSize: '20px',
             }}
           >
-            {darkMode ? '☀️' : '🌙'}
+            {state.darkMode ? '☀️' : '🌙'}
           </button>
 
           {/* Profile */}
@@ -72,7 +85,7 @@ export default function TopBar({ darkMode, onToggleDark, isOffline }: TopBarProp
               fontFamily: 'var(--font-family)',
             }}
           >
-            R
+            {shopName.charAt(0).toUpperCase()}
           </button>
         </div>
       </header>

@@ -1,18 +1,21 @@
 import React from 'react';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
-const tabs = [
-  { id: 'home', label: 'Home', icon: HomeIcon },
-  { id: 'ask', label: 'Ask', icon: AskIcon },
-  { id: 'tools', label: 'Tools', icon: ToolsIcon },
-  { id: 'learn', label: 'Learn', icon: LearnIcon },
-];
-
 export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+  const { t } = useTranslation();
+
+  const tabs = [
+    { id: 'home', label: t('navHome'), icon: HomeIcon },
+    { id: 'ask', label: t('navAsk'), icon: AskIcon },
+    { id: 'tools', label: t('navTools'), icon: ToolsIcon },
+    { id: 'learn', label: t('navLearn'), icon: LearnIcon },
+  ];
+
   return (
     <nav className="bottom-nav" role="navigation" aria-label="Main navigation">
       {tabs.map((tab) => {
