@@ -24,6 +24,8 @@ import PrivacyScreen from './components/PrivacyScreen';
 import HelpScreen from './components/HelpScreen';
 import ProfileScreen from './components/ProfileScreen';
 import UndoBar from './components/UndoBar';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import ReportProblemScreen from './components/ReportProblemScreen';
 
 function AppContent() {
   const { state, dispatch } = useApp();
@@ -135,6 +137,9 @@ function AppContent() {
     if (state.showScreen === 'profile') {
       return <ProfileScreen />;
     }
+    if (state.showScreen === 'report') {
+      return <ReportProblemScreen />;
+    }
 
     switch (state.activeTab) {
       case 'home':
@@ -186,7 +191,9 @@ function AppContent() {
         overflowX: 'hidden',
         paddingBottom: 'calc(var(--nav-height) + var(--space-4) + env(safe-area-inset-bottom, 0px))',
       }}>
-        {renderMainScreen()}
+        <ErrorBoundary>
+          {renderMainScreen()}
+        </ErrorBoundary>
       </main>
 
       {/* Undo Bar */}

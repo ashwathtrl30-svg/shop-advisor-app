@@ -78,6 +78,24 @@ export function saveState(state: AppState): StorageError | null {
   }
 }
 
+// Migrate old lesson progress format to new format
+function migrateLessonProgress(oldProgress: any): any {
+  // If it already has the new format, return as-is
+  if (oldProgress && typeof oldProgress.totalLessons === 'number') {
+    return oldProgress;
+  }
+  
+  // Convert old format to new format
+  return {
+    totalLessons: 50, // Default to first batch size
+    lessonsShown: [],
+    lessonsCompleted: oldProgress?.completed || [], // Convert 'completed' to 'lessonsCompleted'
+    dailySelections: [],
+    currentStreak: oldProgress?.streak || 0, // Convert 'streak' to 'currentStreak'
+    longestStreak: oldProgress?.streak || 0,
+  };
+}
+
 // Load state from localStorage
 export function loadState(): { state: Partial<AppState> | null; error: StorageError | null } {
   if (!isStorageAvailable()) {
@@ -105,6 +123,11 @@ export function loadState(): { state: Partial<AppState> | null; error: StorageEr
         state: migrateData(data),
         error: null,
       };
+    }
+
+    // Migrate lesson progress if needed (Phase D format change)
+    if (data.state?.lessonProgress) {
+      data.state.lessonProgress = migrateLessonProgress(data.state.lessonProgress);
     }
 
     return { state: data.state, error: null };

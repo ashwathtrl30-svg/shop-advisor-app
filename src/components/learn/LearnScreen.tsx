@@ -11,6 +11,28 @@ export default function LearnScreen() {
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Safety check: ensure lessonProgress has required properties
+  if (!state.lessonProgress || !Array.isArray(state.lessonProgress.dailySelections)) {
+    return (
+      <div style={{ padding: 'var(--space-lg)', textAlign: 'center' }}>
+        <h2 className="text-heading-2" style={{ marginBottom: 'var(--space-md)' }}>
+          {lang === 'hi' ? 'कुछ गलत हो गया' : 'Something went wrong'}
+        </h2>
+        <p className="text-body-md" style={{ marginBottom: 'var(--space-lg)', color: 'var(--color-text-secondary)' }}>
+          {lang === 'hi' ? 'आपका डेटा सुरक्षित है। कृपया पुनः प्रयास करें।' : 'Your data is safe. Please try again.'}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="btn-primary"
+          style={{ marginBottom: 'var(--space-md)' }}
+        >
+          {lang === 'hi' ? 'पुनः प्रयास करें' : 'Try again'}
+        </button>
+      </div>
+    );
+  }
 
   // Get today's date
   const today = new Date().toISOString().split('T')[0];
@@ -22,24 +44,35 @@ export default function LearnScreen() {
   // Create daily selection if needed (in useEffect to avoid render-time dispatch)
   useEffect(() => {
     if (!dailySelection && displayDate === today) {
-      const newSelection = selectDailyLessons(
-        lessonLibrary,
-        state.lessonProgress,
-        state.shopProfile,
-        state.shopData
-      );
-      
-      // Save to state
-      dispatch({
-        type: 'UPDATE_LESSON_PROGRESS',
-        payload: {
-          ...state.lessonProgress,
-          dailySelections: [...state.lessonProgress.dailySelections, newSelection],
-          lessonsShown: [...state.lessonProgress.lessonsShown, ...newSelection.lessons.map(l => l.id)],
-        },
-      });
+      try {
+        const newSelection = selectDailyLessons(
+          lessonLibrary,
+          state.lessonProgress,
+          state.shopProfile,
+          state.shopData
+        );
+        
+        // Ensure we have lessons
+        if (!newSelection || !newSelection.lessons || newSelection.lessons.length === 0) {
+          setError(lang === 'hi' ? 'पाठ लोड नहीं हो सके' : 'Could not load lessons');
+          return;
+        }
+        
+        // Save to state
+        dispatch({
+          type: 'UPDATE_LESSON_PROGRESS',
+          payload: {
+            ...state.lessonProgress,
+            dailySelections: [...state.lessonProgress.dailySelections, newSelection],
+            lessonsShown: [...state.lessonProgress.lessonsShown, ...newSelection.lessons.map(l => l.id)],
+          },
+        });
+      } catch (err) {
+        console.error('Error creating daily lessons:', err);
+        setError(lang === 'hi' ? 'पाठ लोड करने में त्रुटि' : 'Error loading lessons');
+      }
     }
-  }, [dailySelection, displayDate, today, state.lessonProgress, state.shopProfile, state.shopData, dispatch]);
+  }, [dailySelection, displayDate, today, state.lessonProgress, state.shopProfile, state.shopData, dispatch, lang]);
 
   const lessons = dailySelection?.lessons || [];
   const completedToday = dailySelection?.completed || [];
@@ -65,6 +98,27 @@ export default function LearnScreen() {
 
   return (
     <div style={{ padding: 'var(--space-lg)', paddingBottom: 'calc(var(--nav-height) + var(--space-lg))' }}>
+      {/* Error message if any */}
+      {error && (
+        <div className="card" style={{ 
+          padding: 'var(--space-md)', 
+          marginBottom: 'var(--space-lg)',
+          backgroundColor: 'var(--color-warning-light)',
+          borderLeft: '4px solid var(--color-warning)'
+        }}>
+          <p className="text-body-md" style={{ margin: 0, color: 'var(--color-warning-dark)' }}>
+            ⚠️ {error}
+          </p>
+          <button
+            onClick={() => setError(null)}
+            className="btn-secondary"
+            style={{ marginTop: 'var(--space-sm)' }}
+          >
+            {lang === 'hi' ? 'पुनः प्रयास करें' : 'Try again'}
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ marginBottom: 'var(--space-lg)' }}>
         <h1 className="text-heading-1" style={{ margin: '0 0 var(--space-sm) 0' }}>

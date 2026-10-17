@@ -65,7 +65,7 @@ export interface AppState {
     festivals: boolean;
     dailyReminder: boolean;
   };
-  showScreen: 'main' | 'alerts' | 'privacy' | 'help' | 'profile';
+  showScreen: 'main' | 'alerts' | 'privacy' | 'help' | 'profile' | 'report';
   isLoading: boolean;
   storageError: StorageError | null;
   dailyInsights: DailyInsights[];
@@ -101,7 +101,7 @@ type Action =
   | { type: 'SET_QUIZ_SCORE'; payload: { lessonId: string; score: number } }
   | { type: 'UPDATE_LESSON_PROGRESS'; payload: LessonProgress }
   | { type: 'TOGGLE_ALERT'; payload: keyof AppState['alertsEnabled'] }
-  | { type: 'SET_SCREEN'; payload: 'main' | 'alerts' | 'privacy' | 'help' | 'profile' }
+  | { type: 'SET_SCREEN'; payload: 'main' | 'alerts' | 'privacy' | 'help' | 'profile' | 'report' }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_STORAGE_ERROR'; payload: StorageError | null }
   | { type: 'SET_DAILY_INSIGHTS'; payload: DailyInsights[] }

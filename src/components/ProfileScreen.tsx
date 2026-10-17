@@ -332,9 +332,17 @@ export default function ProfileScreen() {
           <button
             onClick={() => dispatch({ type: 'SET_SCREEN', payload: 'help' })}
             className="btn-ghost"
-            style={{ width: '100%', justifyContent: 'flex-start' }}
+            style={{ width: '100%', marginBottom: 'var(--space-sm)', justifyContent: 'flex-start' }}
           >
             ❓ {lang === 'hi' ? 'मदद' : 'Help'}
+          </button>
+
+          <button
+            onClick={() => dispatch({ type: 'SET_SCREEN', payload: 'report' })}
+            className="btn-ghost"
+            style={{ width: '100%', justifyContent: 'flex-start' }}
+          >
+            🐛 {lang === 'hi' ? 'समस्या रिपोर्ट करें' : 'Report a problem'}
           </button>
         </div>
       </div>
