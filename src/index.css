@@ -569,12 +569,12 @@ a:focus-visible {
 
 .input-field {
   width: 100%;
-  height: var(--button-secondary-height);
+  height: 52px;
   padding: 0 var(--space-4);
   background-color: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  font-size: var(--text-base);
+  font-size: 16px;
   color: var(--color-text);
   font-family: var(--font-family);
 }

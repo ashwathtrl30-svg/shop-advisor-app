@@ -48,9 +48,28 @@ export default function ToolLayout({
         alignItems: 'center',
         padding: 'var(--space-md) var(--space-lg)',
         gap: 'var(--space-md)',
+        borderBottom: '1px solid var(--color-border)',
+        minHeight: 'var(--top-bar-height)',
       }}>
-        <button onClick={onBack} className="btn-ghost" style={{ minWidth: 'auto', padding: '8px' }}>
-          ←
+        <button 
+          onClick={onBack} 
+          style={{ 
+            minWidth: '48px',
+            minHeight: '48px',
+            padding: '0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-2)',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--color-text)',
+            fontSize: 'var(--text-sm)',
+            fontFamily: 'var(--font-family)',
+          }}
+        >
+          <span style={{ fontSize: '20px' }}>←</span>
+          <span>{lang === 'hi' ? 'वापस' : 'Back'}</span>
         </button>
         <div style={{ flex: 1 }}>
           <h2 className="text-heading-2" style={{ margin: 0 }}>

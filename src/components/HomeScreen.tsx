@@ -65,11 +65,8 @@ export default function HomeScreen() {
   return (
     <div className="screen-container" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       
-      {/* Greeting */}
+      {/* Date (greeting is now in TopBar) */}
       <div>
-        <h2 className="text-heading-1" style={{ margin: '0 0 var(--space-2) 0' }}>
-          {greeting}
-        </h2>
         <p className="text-body-md" style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
           {dateStr}
         </p>

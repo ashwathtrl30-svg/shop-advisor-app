@@ -132,26 +132,34 @@ function AppContent() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      height: '100vh',
       maxWidth: '480px',
       margin: '0 auto',
       position: 'relative',
       backgroundColor: 'var(--color-bg)',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
     }}>
-      {/* Top Bar */}
+      {/* Top Bar - Fixed at top */}
       <TopBar isOffline={isOffline} onProfileClick={() => dispatch({ type: 'SET_SCREEN', payload: 'profile' })} />
 
-      {/* Main Content */}
-      <main className="content-with-nav">
+      {/* Main Content - Scrollable area */}
+      <main style={{
+        flex: 1,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        paddingBottom: 'calc(var(--nav-height) + var(--space-4) + env(safe-area-inset-bottom, 0px))',
+      }}>
         {renderMainScreen()}
       </main>
 
       {/* Undo Bar */}
       <UndoBar />
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - Fixed at bottom */}
       <BottomNav 
-        activeTab={state.activeTab} 
+        activeTab={state.showScreen === 'main' ? state.activeTab : ''} 
         onTabChange={(tab) => {
           // Reset showScreen to 'main' when switching tabs
           // This closes Profile, Alerts, Privacy, Help overlays

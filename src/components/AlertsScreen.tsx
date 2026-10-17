@@ -31,11 +31,29 @@ export default function AlertsScreen() {
         alignItems: 'center',
         gap: 'var(--space-md)',
         borderBottom: '1px solid var(--color-border)',
+        minHeight: 'var(--top-bar-height)',
       }}>
-        <button onClick={handleBack} className="btn-ghost" style={{ minWidth: 'auto', padding: '8px' }}>
-          ←
+        <button 
+          onClick={handleBack} 
+          style={{ 
+            minWidth: '48px',
+            minHeight: '48px',
+            padding: '0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-2)',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--color-text)',
+            fontSize: 'var(--text-sm)',
+            fontFamily: 'var(--font-family)',
+          }}
+        >
+          <span style={{ fontSize: '20px' }}>←</span>
+          <span>{lang === 'hi' ? 'वापस' : 'Back'}</span>
         </button>
-        <h1 className="text-heading-1" style={{ margin: 0 }}>
+        <h1 className="text-heading-1" style={{ margin: 0, flex: 1 }}>
           🔔 {lang === 'hi' ? 'अलर्ट' : 'Alerts'}
         </h1>
       </div>

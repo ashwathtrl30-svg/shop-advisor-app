@@ -39,16 +39,17 @@ export default function WeeklyChart({ data }: WeeklyChartProps) {
   };
 
   const getComparisonText = () => {
-    if (lastWeek === 0 && thisWeek === 0) {
-      return lang === 'hi' ? 'इस हफ्ते डेटा डालें' : 'Add data this week';
-    }
+    // If last week has no data, show message to add more days
     if (lastWeek === 0) {
-      return lang === 'hi' ? 'पिछले हफ्ते का डेटा नहीं है' : 'No data from last week';
+      return lang === 'hi' 
+        ? 'तुलना देखने के लिए कुछ और दिन डेटा डालें' 
+        : 'Add a few more days to see how this week compares';
     }
+    // Both weeks have data
     if (difference > 0) {
       return lang === 'hi' 
         ? `इस हफ्ते ${formatCurrency(difference)} ज़्यादा कमाया`
-        : `Earned ${formatCurrency(difference)} more this week`;
+        : `This week is ${formatCurrency(difference)} more than last week`;
     } else if (difference < 0) {
       return lang === 'hi'
         ? `पिछले हफ्ते ${formatCurrency(Math.abs(difference))} ज़्यादा था`
@@ -58,8 +59,8 @@ export default function WeeklyChart({ data }: WeeklyChartProps) {
   };
 
   return (
-    <div className="card" style={{ padding: 'var(--space-lg)' }}>
-      <h3 className="text-heading-3" style={{ margin: '0 0 var(--space-md) 0' }}>
+    <div className="card" style={{ padding: 'var(--space-4)' }}>
+      <h3 className="text-heading-3" style={{ margin: '0 0 var(--space-3) 0' }}>
         {lang === 'hi' ? 'पिछले 7 दिन' : 'Last 7 Days'}
       </h3>
 
@@ -68,13 +69,15 @@ export default function WeeklyChart({ data }: WeeklyChartProps) {
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'space-between',
-        height: '120px',
-        gap: 'var(--space-xs)',
-        marginBottom: 'var(--space-md)',
+        height: '140px',
+        gap: 'var(--space-2)',
+        marginBottom: 'var(--space-3)',
+        paddingTop: 'var(--space-6)',
       }}>
         {chartData.map((day, index) => {
           const height = (day.sales / maxSales) * 100;
           const isToday = index === chartData.length - 1;
+          const hasData = day.sales > 0;
           
           return (
             <div
@@ -84,21 +87,44 @@ export default function WeeklyChart({ data }: WeeklyChartProps) {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '4px',
+                gap: 'var(--space-1)',
               }}
             >
-              {/* Bar */}
-              <div
-                style={{
-                  width: '100%',
-                  maxWidth: '40px',
-                  height: `${Math.max(height, 4)}%`,
-                  backgroundColor: isToday ? 'var(--color-primary)' : 'var(--color-primary-light)',
-                  borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
-                  transition: 'height 0.3s ease',
-                  minHeight: '4px',
-                }}
-              />
+              {/* Amount above bar */}
+              {hasData && (
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: isToday ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {day.sales >= 1000 ? `₹${(day.sales / 1000).toFixed(1)}k` : `₹${day.sales}`}
+                </span>
+              )}
+              {/* Bar or dash */}
+              {hasData ? (
+                <div
+                  style={{
+                    width: '100%',
+                    maxWidth: '32px',
+                    height: `${Math.max(height, 8)}%`,
+                    backgroundColor: isToday ? 'var(--color-primary)' : 'var(--color-primary-light)',
+                    borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
+                    transition: 'height 0.3s ease',
+                    minHeight: '8px',
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '100%',
+                    maxWidth: '32px',
+                    height: '8px',
+                    backgroundColor: 'var(--color-border)',
+                    borderRadius: 'var(--radius-sm)',
+                  }}
+                />
+              )}
               {/* Day label */}
               <span style={{
                 fontSize: '12px',
@@ -113,7 +139,7 @@ export default function WeeklyChart({ data }: WeeklyChartProps) {
       </div>
 
       {/* Summary text */}
-      <p className="text-body-md" style={{
+      <p className="text-body-sm" style={{
         margin: 0,
         color: 'var(--color-text-secondary)',
         textAlign: 'center',

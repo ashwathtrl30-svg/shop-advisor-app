@@ -56,16 +56,34 @@ export default function SaleEntryScreen({ onClose }: SaleEntryScreenProps) {
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        gap: 'var(--space-md)',
         padding: 'var(--space-md) var(--space-lg)',
+        borderBottom: '1px solid var(--color-border)',
+        minHeight: 'var(--top-bar-height)',
       }}>
-        <button onClick={onClose} className="btn-ghost">
-          ← {lang === 'hi' ? 'वापस' : 'Back'}
+        <button 
+          onClick={onClose} 
+          style={{ 
+            minWidth: '48px',
+            minHeight: '48px',
+            padding: '0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-2)',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--color-text)',
+            fontSize: 'var(--text-sm)',
+            fontFamily: 'var(--font-family)',
+          }}
+        >
+          <span style={{ fontSize: '20px' }}>←</span>
+          <span>{lang === 'hi' ? 'वापस' : 'Back'}</span>
         </button>
-        <h2 className="text-heading-2" style={{ margin: 0 }}>
+        <h2 className="text-heading-2" style={{ margin: 0, flex: 1 }}>
           {lang === 'hi' ? 'बिक्री डालें' : 'Add Sale'}
         </h2>
-        <div style={{ width: '60px' }} />
       </div>
 
       {/* Number Pad */}

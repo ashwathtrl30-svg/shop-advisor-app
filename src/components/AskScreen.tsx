@@ -217,7 +217,7 @@ export default function AskScreen() {
         </div>
       )}
 
-      {/* Input Area */}
+      {/* Input Area - Fixed above bottom nav */}
       <div style={{
         padding: 'var(--space-md) var(--space-lg)',
         backgroundColor: 'var(--color-bg-card)',
@@ -225,6 +225,9 @@ export default function AskScreen() {
         display: 'flex',
         gap: 'var(--space-md)',
         alignItems: 'center',
+        position: 'sticky',
+        bottom: 0,
+        zIndex: 10,
       }}>
         {/* Text Input */}
         <input
@@ -235,17 +238,38 @@ export default function AskScreen() {
           placeholder={lang === 'hi' ? 'यहां टाइप करें...' : 'Type here...'}
           style={{
             flex: 1,
-            height: '48px',
-            padding: '0 var(--space-md)',
+            height: '52px',
+            padding: '0 var(--space-4)',
             border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-lg)',
+            borderRadius: 'var(--radius-md)',
             backgroundColor: 'var(--color-bg)',
             color: 'var(--color-text)',
             fontSize: '16px',
             fontFamily: 'var(--font-family)',
-          outline: 'none',
-        }}
-      />
-    </div>    </div>
+            outline: 'none',
+          }}
+        />
+        {/* Send Button */}
+        <button
+          onClick={() => handleSendMessage(inputText)}
+          disabled={!inputText.trim()}
+          style={{
+            width: '52px',
+            height: '52px',
+            borderRadius: 'var(--radius-md)',
+            backgroundColor: inputText.trim() ? 'var(--color-primary)' : 'var(--color-border)',
+            border: 'none',
+            cursor: inputText.trim() ? 'pointer' : 'not-allowed',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '20px',
+            transition: 'background-color 0.2s',
+          }}
+        >
+          ➤
+        </button>
+      </div>
+    </div>
   );
 }
