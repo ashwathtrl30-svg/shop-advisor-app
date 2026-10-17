@@ -17,6 +17,18 @@ export interface ShopProfile {
   credit?: string;
   accounts?: string;
   worries?: string[];
+  // Phase A: Additional shop numbers
+  mainItems?: string[]; // 3-5 main items sold
+  busiestDays?: string[]; // Busiest days of week
+  busiestHours?: string; // Busiest hours
+  monthlyRent?: number; // Monthly rent (0 if owned)
+  monthlySalaries?: number; // Total monthly salaries
+  monthlyFixedCosts?: number; // Electricity + other fixed costs
+  monthlyLoanInstallment?: number; // Monthly loan EMI (if any)
+  openingCash?: number; // Cash at start of day
+  existingUdhaar?: number; // Udhaar pending before app
+  profitTarget?: number; // Monthly profit target
+  appGoal?: string; // What user wants from app
 }
 
 // Onboarding steps
